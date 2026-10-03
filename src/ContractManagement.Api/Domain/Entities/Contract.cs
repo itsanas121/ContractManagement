@@ -7,7 +7,7 @@ public class Contract
 {
     public int Id { get; private set; }
     public string ContractNumber { get; private set; } = string.Empty;
-    public string Title { get; private set ;} = string.Empty;
+    public string Title { get; private set; } = string.Empty;
     public string? Description { get; private set; }
     public decimal ContractValue { get; private set; }
     public DateOnly StartDate { get; private set; }
@@ -55,31 +55,31 @@ public class Contract
         CreatedDate = DateTime.UtcNow;
     }
 
-    public void SubmitforReview()
+    public void SubmitForReview()
     {
         EnsureStatus(ContractStatus.Draft, "submit");
         Status = ContractStatus.UnderReview;
     }
-    
+
     public void Approve(int approvedById)
     {
         EnsureStatus(ContractStatus.UnderReview, "approve");
         if (approvedById == OwnerId)
             throw new DomainException("The contract owner cannot approve their own contract.");
-            
+
         Status = ContractStatus.Approved;
         ApprovedById = approvedById;
         ApprovedDate = DateTime.UtcNow;
     }
 
-    public void Reject(int rejectedbyId, string reason)
+    public void Reject(int rejectedById, string reason)
     {
         EnsureStatus(ContractStatus.UnderReview, "reject");
-        if(string.IsNullOrWhiteSpace(reason))
+        if (string.IsNullOrWhiteSpace(reason))
             throw new DomainException("Rejection reason is required.");
-        
+
         Status = ContractStatus.Rejected;
-        RejectedById = rejectedbyId;
+        RejectedById = rejectedById;
         RejectedDate = DateTime.UtcNow;
         RejectionReason = reason;
     }
@@ -87,7 +87,7 @@ public class Contract
     public void Activate(DateOnly today)
     {
         EnsureStatus(ContractStatus.Approved, "activate");
-        if(StartDate > today)
+        if (StartDate > today)
             throw new ContractActivationException($"Contract cannot be activated before its start date ({StartDate}).");
 
         Status = ContractStatus.Active;
@@ -95,7 +95,7 @@ public class Contract
     public void Terminate(int terminatedById, string reason)
     {
         EnsureStatus(ContractStatus.Active, "terminate");
-        if(string.IsNullOrWhiteSpace(reason))
+        if (string.IsNullOrWhiteSpace(reason))
             throw new DomainException("Termination reason is required.");
 
         Status = ContractStatus.Terminated;
