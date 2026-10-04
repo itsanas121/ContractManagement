@@ -17,3 +17,14 @@ public class ContractActivationException : DomainException
 {
     public ContractActivationException(string message) : base(message) { }
 }
+
+public class DomainValidationException : DomainException
+{
+    public IReadOnlyList<string> Errors { get; }
+
+    public DomainValidationException(IEnumerable<string> errors)
+        : base("One or more validation errors occurred.")
+    {
+        Errors = errors.ToList();
+    }
+}
