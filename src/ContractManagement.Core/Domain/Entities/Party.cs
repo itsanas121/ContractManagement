@@ -1,6 +1,6 @@
-using ContractManagement.Api.Domain.Exceptions;
+using ContractManagement.Core.Domain.Exceptions;
 
-namespace ContractManagement.Api.Domain.Entities;
+namespace ContractManagement.Core.Domain.Entities;
 
 public abstract class Party
 {

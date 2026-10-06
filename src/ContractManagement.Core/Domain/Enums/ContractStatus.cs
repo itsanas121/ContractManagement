@@ -1,4 +1,4 @@
-namespace ContractManagement.Api.Domain.Enums;
+namespace ContractManagement.Core.Domain.Enums;
 
 public enum ContractStatus
 {

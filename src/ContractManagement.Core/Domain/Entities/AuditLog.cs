@@ -1,4 +1,4 @@
-namespace ContractManagement.Api.Domain.Entities;
+namespace ContractManagement.Core.Domain.Entities;
 
 public class AuditLog
 {
