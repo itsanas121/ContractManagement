@@ -1,7 +1,7 @@
-using ContractManagement.Api.Domain.Enums;
-using ContractManagement.Api.Domain.Exceptions;
+using ContractManagement.Core.Domain.Enums;
+using ContractManagement.Core.Domain.Exceptions;
 
-namespace ContractManagement.Api.Domain.Entities;
+namespace ContractManagement.Core.Domain.Entities;
 
 public class User
 {
