@@ -18,7 +18,7 @@ public class User
     public UserProfile? Profile { get; private set; }
 
     public string FullName => $"{FirstName} {LastName}";
-    public bool isActive => Status == UserStatus.Active;
+    public bool IsActive => Status == UserStatus.Active;
 
     private User() { }
 
