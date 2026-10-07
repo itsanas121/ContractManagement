@@ -1,15 +1,17 @@
-using ContractManagement.Api.Domain.Enums;
-using ContractManagement.Api.Domain.Exceptions;
+using ContractManagement.Core.Domain.Enums;
+using ContractManagement.Core.Domain.Exceptions;
 
-namespace ContractManagement.Api.Domain.Entities;
+namespace ContractManagement.Core.Domain.Entities;
 
 public class User
 {
     public int Id { get; private set; }
-    public string FirstName { get; private set; } = String.Empty;
-    public string LastName { get; private set; } = String.Empty;
-    public string Email { get; private set; } = String.Empty;
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
     public string EmployeeNumber { get; private set; } = string.Empty;
+    public string PasswordHash { get; private set; } = string.Empty;
+    public UserRole Role { get; private set; }
     public UserStatus Status { get; private set; }
     public DateTime CreatedDate { get; private set; }
 
@@ -18,11 +20,11 @@ public class User
     public UserProfile? Profile { get; private set; }
 
     public string FullName => $"{FirstName} {LastName}";
-    public bool isActive => Status == UserStatus.Active;
+    public bool IsActive => Status == UserStatus.Active;
 
     private User() { }
 
-    public User(string firstName, string lastName, string email, string employeeNumber, Company company)
+    public User(string firstName, string lastName, string email, string employeeNumber, string passwordHash, UserRole role, Company company)
     {
         if (string.IsNullOrWhiteSpace(firstName))
             throw new DomainException("First name is required.");
@@ -32,6 +34,8 @@ public class User
             throw new DomainException("A valid email is required.");
         if (string.IsNullOrWhiteSpace(employeeNumber))
             throw new DomainException("Employee number is required.");
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new DomainException("Password hash is required.");
         if (!company.IsActive)
             throw new DomainException("A user cannot be assigned to an inactive company.");
 
@@ -39,6 +43,8 @@ public class User
         LastName = lastName;
         Email = email;
         EmployeeNumber = employeeNumber;
+        PasswordHash = passwordHash;
+        Role = role;
         Company = company;
         Status = UserStatus.Active;
         CreatedDate = DateTime.UtcNow;
@@ -46,19 +52,19 @@ public class User
 
     public void Deactivate() => Status = UserStatus.Inactive;
 
+    public void Activate()
+    {
+        if (!Company.IsActive)
+            throw new DomainException("Cannot activate a user whose company is inactive.");
+
+        Status = UserStatus.Active;
+    }
+
     public void SetProfile(string? jobTitle, string? department, string? phoneNumber)
     {
         if (Profile is null)
             Profile = new UserProfile(jobTitle, department, phoneNumber);
         else
             Profile.Update(jobTitle, department, phoneNumber);
-    }
-
-    public void Activate()
-    {
-        if (!Company.IsActive)
-            throw new DomainException("Cannot activate a user whose company is inactive.");
-        else
-            Status = UserStatus.Active;
     }
 }

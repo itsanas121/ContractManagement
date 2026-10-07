@@ -1,8 +1,7 @@
-namespace ContractManagement.Api.Domain.Entities;
+namespace ContractManagement.Core.Domain.Entities;
 
 public class UserProfile
 {
-    public int Id { get; private set; }
     public int UserId { get; private set; }
     public string? JobTitle { get; private set; }
     public string? Department { get; private set; }

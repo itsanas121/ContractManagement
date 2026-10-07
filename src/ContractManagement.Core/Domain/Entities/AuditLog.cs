@@ -1,4 +1,6 @@
-namespace ContractManagement.Api.Domain.Entities;
+using ContractManagement.Core.Domain.Exceptions;
+
+namespace ContractManagement.Core.Domain.Entities;
 
 public class AuditLog
 {
@@ -16,6 +18,11 @@ public class AuditLog
     public AuditLog(string entityType, int entityId, string action,
         string? oldValue, string? newValue, int? performedById)
     {
+        if (string.IsNullOrWhiteSpace(entityType))
+            throw new DomainException("Entity type is required.");
+        if (string.IsNullOrWhiteSpace(action))
+            throw new DomainException("Action is required.");
+        
         EntityType = entityType;
         EntityId = entityId;
         Action = action;

@@ -1,10 +1,13 @@
-using ContractManagement.Api.Domain.Enums;
-using ContractManagement.Api.Domain.Exceptions;
+using ContractManagement.Core.Domain.Enums;
+using ContractManagement.Core.Domain.Exceptions;
 
-namespace ContractManagement.Api.Domain.Entities;
+namespace ContractManagement.Core.Domain.Entities;
 
 public class Contract
 {
+    private readonly List<ContractParty> _parties = new();
+    private readonly List<ContractDocument> _documents = new();
+
     public int Id { get; private set; }
     public string ContractNumber { get; private set; } = string.Empty;
     public string Title { get; private set; } = string.Empty;
@@ -17,7 +20,9 @@ public class Contract
     public DateTime CreatedDate { get; private set; }
 
     public int CompanyId { get; private set; }
+    public Company Company { get; private set; } = null!;
     public int OwnerId { get; private set; }
+    public User Owner { get; private set; } = null!;
 
     public int? ApprovedById { get; private set; }
     public DateTime? ApprovedDate { get; private set; }
@@ -28,10 +33,15 @@ public class Contract
     public DateTime? TerminationDate { get; private set; }
     public string? TerminationReason { get; private set; }
 
+    public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
+
+    public IReadOnlyCollection<ContractParty> Parties => _parties;
+    public IReadOnlyCollection<ContractDocument> Documents => _documents;
+
     private Contract() { }
 
     public Contract(string contractNumber, string title, string? description, decimal contractValue,
-        DateOnly startDate, DateOnly endDate, ContractType contractType, int companyId, int ownerId)
+        DateOnly startDate, DateOnly endDate, ContractType contractType, Company company, User owner)
     {
         if (string.IsNullOrWhiteSpace(contractNumber))
             throw new DomainException("Contract number is required.");
@@ -41,6 +51,12 @@ public class Contract
             throw new DomainException("Contract value must be greater than zero.");
         if (endDate <= startDate)
             throw new DomainException("End date must be after start date.");
+        if (!company.IsActive)
+            throw new DomainException("Contracts cannot be created for an inactive company.");
+        if (!owner.IsActive)
+            throw new DomainException("The contract owner must be an active user.");
+        if (owner.CompanyId != company.Id)
+            throw new DomainException("The contract owner must belong to the same company.");
 
         ContractNumber = contractNumber;
         Title = title;
@@ -49,37 +65,66 @@ public class Contract
         StartDate = startDate;
         EndDate = endDate;
         ContractType = contractType;
-        CompanyId = companyId;
-        OwnerId = ownerId;
+        Company = company;
+        CompanyId = company.Id;
+        Owner = owner;
+        OwnerId = owner.Id;
         Status = ContractStatus.Draft;
         CreatedDate = DateTime.UtcNow;
+    }
+
+    public void AddParty(Party party, PartyRole partyRole)
+    {
+        EnsureStatus(ContractStatus.Draft, "add a party to");
+        if (_parties.Any(cp => cp.PartyId == party.Id))
+            throw new DomainException($"{party.Name} is already a party to this contract.");
+
+        _parties.Add(new ContractParty(party, partyRole));
+    }
+
+    public void AddDocument(string fileName, DocumentType documentType, string? filePath, int uploadedById)
+    {
+        EnsureStatus(ContractStatus.Draft, "add a document to");
+        _documents.Add(new ContractDocument(fileName, documentType, filePath, uploadedById));
     }
 
     public void SubmitForReview()
     {
         EnsureStatus(ContractStatus.Draft, "submit");
+
+        var errors = new List<string>();
+        if (_parties.Count == 0)
+            errors.Add("Contract must contain at least one party.");
+        if (_documents.Count == 0)
+            errors.Add("Contract document is required.");
+        if (!Company.IsActive)
+            errors.Add("Company must be active.");
+
+        if (errors.Count > 0)
+            throw new DomainValidationException(errors);
+
         Status = ContractStatus.UnderReview;
     }
 
-    public void Approve(int approvedById)
+    public void Approve(User reviewer)
     {
         EnsureStatus(ContractStatus.UnderReview, "approve");
-        if (approvedById == OwnerId)
-            throw new DomainException("The contract owner cannot approve their own contract.");
+        EnsureCanReview(reviewer);
 
         Status = ContractStatus.Approved;
-        ApprovedById = approvedById;
+        ApprovedById = reviewer.Id;
         ApprovedDate = DateTime.UtcNow;
     }
 
-    public void Reject(int rejectedById, string reason)
+    public void Reject(User reviewer, string reason)
     {
         EnsureStatus(ContractStatus.UnderReview, "reject");
+        EnsureCanReview(reviewer);
         if (string.IsNullOrWhiteSpace(reason))
             throw new DomainException("Rejection reason is required.");
 
         Status = ContractStatus.Rejected;
-        RejectedById = rejectedById;
+        RejectedById = reviewer.Id;
         RejectedDate = DateTime.UtcNow;
         RejectionReason = reason;
     }
@@ -88,10 +133,17 @@ public class Contract
     {
         EnsureStatus(ContractStatus.Approved, "activate");
         if (StartDate > today)
-            throw new ContractActivationException($"Contract cannot be activated before its start date ({StartDate}).");
+            throw new ContractActivationException($"Contract cannot be activated before its start date ({StartDate:yyyy-MM-dd}).");
+        if (EndDate < today)
+            throw new ContractActivationException("Contract cannot be activated because its end date has already passed.");
+        if (!Company.IsActive)
+            throw new ContractActivationException("Contract cannot be activated because the company is inactive.");
+        if (_parties.Count == 0)
+            throw new ContractActivationException("Contract cannot be activated without at least one party.");
 
         Status = ContractStatus.Active;
     }
+
     public void Terminate(int terminatedById, string reason)
     {
         EnsureStatus(ContractStatus.Active, "terminate");
@@ -117,5 +169,17 @@ public class Contract
     {
         if (Status != expected)
             throw new InvalidContractStatusException(ContractNumber, Status, action);
+    }
+    
+    private void EnsureCanReview(User reviewer)
+    {
+        if (reviewer.Role != UserRole.Reviewer)
+            throw new DomainException("Only a reviewer can approve or reject a contract.");
+        if (!reviewer.IsActive)
+            throw new DomainException("Inactive users cannot review contracts.");
+        if (reviewer.CompanyId != CompanyId)
+            throw new DomainException("The reviewer must belong to the contract's company.");
+        if (reviewer.Id == OwnerId)
+            throw new DomainException("The contract owner cannot review their own contract.");
     }
 }

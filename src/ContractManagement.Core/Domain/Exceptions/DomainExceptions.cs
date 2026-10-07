@@ -1,6 +1,6 @@
-using ContractManagement.Api.Domain.Enums;
+using ContractManagement.Core.Domain.Enums;
 
-namespace ContractManagement.Api.Domain.Exceptions;
+namespace ContractManagement.Core.Domain.Exceptions;
 
 public class DomainException : Exception
 {
