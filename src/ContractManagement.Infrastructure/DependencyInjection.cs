@@ -1,0 +1,25 @@
+using ContractManagement.Core.Application.Common;
+using ContractManagement.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace ContractManagement.Infrastructure;
+
+public static class DependencyInjection
+{
+    // One method for Program.cs to call, so the Api doesn't need to know what is inside Infrastructure
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+
+        services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+        // when a service asks for IAppDbContext, it gets the same AppDbContext instance
+        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+
+        return services;
+    }
+}
