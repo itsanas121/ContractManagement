@@ -1,3 +1,4 @@
+using ContractManagement.Core.Domain.Enums;
 using ContractManagement.Core.Domain.Exceptions;
 
 namespace ContractManagement.Core.Domain.Entities;
@@ -5,24 +6,22 @@ namespace ContractManagement.Core.Domain.Entities;
 public class AuditLog
 {
     public int Id { get; private set; }
-    public string EntityType { get; private set; } = string.Empty;
+    public AuditEntityType EntityType { get; private set; }
     public int EntityId { get; private set; }
-    public string Action { get; private set; } = string.Empty;
+    public AuditAction Action { get; private set; }
     public string? OldValue { get; private set; }
     public string? NewValue { get; private set; }
     public int? PerformedById { get; private set; }
     public DateTime PerformedAt { get; private set; }
 
-    private AuditLog() { }
+    private AuditLog() { } // Required by EF Core
 
-    public AuditLog(string entityType, int entityId, string action,
+    public AuditLog(AuditEntityType entityType, int entityId, AuditAction action,
         string? oldValue, string? newValue, int? performedById)
     {
-        if (string.IsNullOrWhiteSpace(entityType))
-            throw new DomainException("Entity type is required.");
-        if (string.IsNullOrWhiteSpace(action))
-            throw new DomainException("Action is required.");
-        
+        if (entityId <= 0)
+            throw new DomainException("An audit entry needs the ID of a saved entity.");
+
         EntityType = entityType;
         EntityId = entityId;
         Action = action;
