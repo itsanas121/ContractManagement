@@ -7,7 +7,7 @@ public class Contract
 {
     private readonly List<ContractParty> _parties = new();
     private readonly List<ContractDocument> _documents = new();
-    
+
     public int Id { get; private set; }
     public string ContractNumber { get; private set; } = string.Empty;
     public string Title { get; private set; } = string.Empty;
@@ -37,7 +37,7 @@ public class Contract
 
     public IReadOnlyCollection<ContractParty> Parties => _parties;
     public IReadOnlyCollection<ContractDocument> Documents => _documents;
-    
+
     private Contract() { }
 
     public Contract(string contractNumber, string title, string? description, decimal contractValue,
@@ -77,7 +77,7 @@ public class Contract
     {
         EnsureStatus(ContractStatus.Draft, "add a party to");
         if (_parties.Any(cp => cp.PartyId == party.Id))
-            throw new DomainException($"{party.DisplayName} is already a party to this contract.");
+            throw new DomainException($"{party.Name} is already a party to this contract.");
 
         _parties.Add(new ContractParty(party, partyRole));
     }
@@ -106,25 +106,25 @@ public class Contract
         Status = ContractStatus.UnderReview;
     }
 
-    public void Approve(int approvedById)
+    public void Approve(User reviewer)
     {
         EnsureStatus(ContractStatus.UnderReview, "approve");
-        if (approvedById == OwnerId)
-            throw new DomainException("The contract owner cannot approve their own contract.");
+        EnsureCanReview(reviewer);
 
         Status = ContractStatus.Approved;
-        ApprovedById = approvedById;
+        ApprovedById = reviewer.Id;
         ApprovedDate = DateTime.UtcNow;
     }
 
-    public void Reject(int rejectedById, string reason)
+    public void Reject(User reviewer, string reason)
     {
         EnsureStatus(ContractStatus.UnderReview, "reject");
+        EnsureCanReview(reviewer);
         if (string.IsNullOrWhiteSpace(reason))
             throw new DomainException("Rejection reason is required.");
 
         Status = ContractStatus.Rejected;
-        RejectedById = rejectedById;
+        RejectedById = reviewer.Id;
         RejectedDate = DateTime.UtcNow;
         RejectionReason = reason;
     }
@@ -169,5 +169,17 @@ public class Contract
     {
         if (Status != expected)
             throw new InvalidContractStatusException(ContractNumber, Status, action);
+    }
+    
+    private void EnsureCanReview(User reviewer)
+    {
+        if (reviewer.Role != UserRole.Reviewer)
+            throw new DomainException("Only a reviewer can approve or reject a contract.");
+        if (!reviewer.IsActive)
+            throw new DomainException("Inactive users cannot review contracts.");
+        if (reviewer.CompanyId != CompanyId)
+            throw new DomainException("The reviewer must belong to the contract's company.");
+        if (reviewer.Id == OwnerId)
+            throw new DomainException("The contract owner cannot review their own contract.");
     }
 }
