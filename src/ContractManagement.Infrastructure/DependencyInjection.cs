@@ -3,6 +3,7 @@ using ContractManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ContractManagement.Infrastructure.Auditing;
 
 namespace ContractManagement.Infrastructure;
 
@@ -19,7 +20,8 @@ public static class DependencyInjection
 
         // when a service asks for IAppDbContext, it gets the same AppDbContext instance
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
-
+        services.AddScoped<IAuditService, AuditService>();
+        
         return services;
     }
 }

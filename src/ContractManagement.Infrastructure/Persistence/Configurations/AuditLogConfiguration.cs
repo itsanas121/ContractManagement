@@ -10,8 +10,8 @@ public sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
     {
         b.ToTable("AuditLogs");
         b.HasKey(x => x.Id);
-        b.Property(x => x.EntityType).IsRequired().HasMaxLength(100);
-        b.Property(x => x.Action).IsRequired().HasMaxLength(50);
+        b.Property(x => x.EntityType).HasConversion<string>().HasMaxLength(100).IsRequired();
+        b.Property(x => x.Action).HasConversion<string>().HasMaxLength(50).IsRequired();
         b.HasIndex(x => new { x.EntityType, x.EntityId });   // to read the history of one record
         b.HasIndex(x => x.PerformedAt);
         // no foreign key on PerformedById on purpose: the log must stay even if the user is removed

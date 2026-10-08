@@ -1,6 +1,7 @@
 using ContractManagement.Core.Application.Common;
 using ContractManagement.Core.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ContractManagement.Infrastructure.Persistence;
 
@@ -17,6 +18,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Party> Parties => Set<Party>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    => Database.BeginTransactionAsync(cancellationToken);
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // finds every IEntityTypeConfiguration<T> class in this project,
