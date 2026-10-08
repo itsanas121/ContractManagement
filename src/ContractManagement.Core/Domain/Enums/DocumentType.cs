@@ -4,7 +4,7 @@ public enum DocumentType
 {
     MainContract,
     CommercialRegistration,
-    TechincalPrroposal,
-    FinanicalProposal,
+    TechnicalProposal,
+    FinancialProposal,
     Other
 }
