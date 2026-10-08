@@ -24,6 +24,7 @@ namespace ContractManagement.Api.ExceptionHandling
 
             var statusCode = exception switch {
                 DomainValidationException => StatusCodes.Status400BadRequest,
+                NotFoundException => StatusCodes.Status404NotFound,
                 InvalidContractStatusException => StatusCodes.Status409Conflict,
                 ContractActivationException => StatusCodes.Status409Conflict,
                 DomainException => StatusCodes.Status400BadRequest,
