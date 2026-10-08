@@ -1,5 +1,6 @@
 using ContractManagement.Core.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ContractManagement.Core.Application.Common;
 
@@ -15,6 +16,8 @@ public interface IAppDbContext
     DbSet<ContractDocument> ContractDocuments { get; }
     DbSet<Party> Parties { get; }      // base type, use OfType<...>() for one kind
     DbSet<AuditLog> AuditLogs { get; }
+
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
