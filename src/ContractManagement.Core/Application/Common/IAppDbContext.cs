@@ -12,8 +12,9 @@ public interface IAppDbContext
     DbSet<User> Users { get; }
     DbSet<UserProfile> UserProfiles { get; }
     DbSet<Contract> Contracts { get; }
-    DbSet<ContractParty> ContractParties { get; }
-    DbSet<ContractDocument> ContractDocuments { get; }
+
+    // ContractParty and ContractDocument sets are intentionally not exposed.
+    // Add them through Contract.AddParty() / AddDocument() to enforce domain rules.
     DbSet<Party> Parties { get; }      // base type, use OfType<...>() for one kind
     DbSet<AuditLog> AuditLogs { get; }
 
