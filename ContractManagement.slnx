@@ -2,5 +2,6 @@
   <Folder Name="/src/">
     <Project Path="src/ContractManagement.Api/ContractManagement.Api.csproj" />
     <Project Path="src/ContractManagement.Core/ContractManagement.Core.csproj" />
+    <Project Path="src/ContractManagement.Infrastructure/ContractManagement.Infrastructure.csproj" />
   </Folder>
 </Solution>
