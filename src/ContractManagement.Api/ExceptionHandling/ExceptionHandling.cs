@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using ContractManagement.Core.Domain.Exceptions;
 
-namespace ContractManagement.Api.ExceptionHandling
-{
+namespace ContractManagement.Api.ExceptionHandling;
+
     public class GlobalExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> _logger;
@@ -79,4 +79,4 @@ namespace ContractManagement.Api.ExceptionHandling
             return true;
         }
     }
-}
+
