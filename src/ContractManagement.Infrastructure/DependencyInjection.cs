@@ -24,6 +24,9 @@ public static class DependencyInjection
         // when a service asks for IClock, it gets the same SystemClock instance
         services.AddSingleton<IClock, SystemClock>();
 
+        // when a service asks for IJwtTokenGenerator, it gets the same JwtTokenGenerator instance
+        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+
         return services;
     }
 }
