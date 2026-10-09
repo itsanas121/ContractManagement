@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ContractManagement.Infrastructure.Auditing;
 
 namespace ContractManagement.Infrastructure;
 
@@ -33,6 +34,8 @@ public static class DependencyInjection
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+        services.AddScoped<IAuditService, AuditService>();
+        
         return services;
     }
 }

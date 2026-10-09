@@ -3,7 +3,7 @@ namespace ContractManagement.Core.Domain.Enums;
 public enum ContractType
 {
     Sales,
-    Procurment,
+    Procurement,
     Service,
     Partnership,
     Other
