@@ -18,9 +18,18 @@ namespace ContractManagement.Api.ExceptionHandling
         public async ValueTask<bool> TryHandleAsync(
             HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            _logger.LogError(
-                exception,
-                "An unhandled exception occurred.");
+            if (exception is DomainException)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "A business rule violation occurred.");
+            } else
+            {
+                _logger.LogError(
+                     exception,
+                     "An unhandled exception occurred.");
+            }
+     
 
             var statusCode = exception switch {
                 DomainValidationException => StatusCodes.Status400BadRequest,
@@ -32,11 +41,26 @@ namespace ContractManagement.Api.ExceptionHandling
                 _ => StatusCodes.Status500InternalServerError
             };
 
+            var title = exception switch
+            {
+                NotFoundException => "Not Found",
+                DomainException => "Business Rule Violation",
+
+                _ => "Internal Server Error"
+            };
+
+            var detail = exception switch
+            {
+                DomainException => exception.Message,
+
+                _ => "An unexpected error occurred."
+            };
+
             ProblemDetails problemDetails = new ProblemDetails()
             {
-                Title = statusCode == 500 ? "Internal Server Error" : "Business Rule Violation",
+                Title = title,
                 Status = statusCode,
-                Detail = exception is DomainException ? exception.Message : "An unexpected error occurred."
+                Detail = detail
             };
 
             if (exception is DomainValidationException validationException)
@@ -52,9 +76,6 @@ namespace ContractManagement.Api.ExceptionHandling
                 problemDetails,
                 cancellationToken);
 
-            // Minimal implementation: do not handle here.
-            // Return true if the exception was handled and the pipeline should stop.
-            //return new ValueTask<bool>(false);
             return true;
         }
     }
