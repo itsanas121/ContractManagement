@@ -23,11 +23,6 @@ namespace ContractManagement.Api.Services
                 return int.TryParse(userIdClaim, out int userId)
                     ? userId
                     : null;
-
-                //var value = _httpContextAccessor.
-                //    HttpContext?.User.
-                //    FindFirstValue(ClaimTypes.NameIdentifier);
-                //return null;
             }
         }
         
