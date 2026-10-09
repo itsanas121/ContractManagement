@@ -4,8 +4,8 @@ using System.Text;
 
 using ContractManagement.Core.Application.Common;
 
-namespace ContractManagement.Infrastructure.Services
-{
+namespace ContractManagement.Infrastructure.Services;
+
     internal class SystemClock : IClock
     {
         public DateTime UtcNow {
@@ -17,4 +17,4 @@ namespace ContractManagement.Infrastructure.Services
         
         }
     }
-}
+

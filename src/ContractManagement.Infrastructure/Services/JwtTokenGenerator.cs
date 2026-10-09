@@ -9,8 +9,8 @@ using ContractManagement.Core.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ContractManagement.Infrastructure.Services
-{
+namespace ContractManagement.Infrastructure.Services;
+
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly IConfiguration _configuration;
@@ -69,4 +69,4 @@ namespace ContractManagement.Infrastructure.Services
 
 
     }
-}
+

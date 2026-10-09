@@ -35,3 +35,10 @@ public class NotFoundException : DomainException
     {
     }
 }
+public class InvalidCredentialsException : DomainException
+{
+    public InvalidCredentialsException()
+        : base("Invalid email or password.")
+    {
+    }
+}

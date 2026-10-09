@@ -4,10 +4,10 @@ using System.Text;
 
 using ContractManagement.Core.Domain.Entities;
 
-namespace ContractManagement.Core.Application.Common
-{
+namespace ContractManagement.Core.Application.Common;
+
     public interface IJwtTokenGenerator
     {
         string GenerateToken(User user);
     }
-}
+

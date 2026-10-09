@@ -1,8 +1,8 @@
 ﻿using ContractManagement.Core.Application.Common;
 using System.Security.Claims;
 
-namespace ContractManagement.Api.Services
-{
+namespace ContractManagement.Api.Services;
+
     public class CurrentUser : ICurrentUser
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -43,4 +43,4 @@ namespace ContractManagement.Api.Services
 
 
     }
-}
+
