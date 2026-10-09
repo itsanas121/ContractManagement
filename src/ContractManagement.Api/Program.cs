@@ -21,7 +21,6 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
-// Configure JWT authentication -> right click on the project (ContractManagement.Api) -> Manage User Secrets -> add jwt:key.
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("JWT key is not configured.");
@@ -30,7 +29,7 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme) //default: "Bearer"
     .AddJwtBearer(options => 
     {
-        // Instead of using the .NET claim like ClaimTypes.NameIdentifier to find "sub" in token, with false we can use the "sub" claim directly.
+        // Keep JWT claim names unchanged, such as "sub" and "role".
         options.MapInboundClaims = false; 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -41,6 +40,10 @@ builder.Services
 
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
+
+            // Treat the JWT "role" claim as the user's role for role-based authorization.
+            RoleClaimType = "role",
+
             ClockSkew = TimeSpan.Zero, // default is 5 minutes
 
 
