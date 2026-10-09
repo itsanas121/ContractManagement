@@ -1,5 +1,6 @@
 using ContractManagement.Core.Application.Common;
 using ContractManagement.Infrastructure.Persistence;
+using ContractManagement.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,9 @@ public static class DependencyInjection
 
         // when a service asks for IAppDbContext, it gets the same AppDbContext instance
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+
+        // when a service asks for IClock, it gets the same SystemClock instance
+        services.AddSingleton<IClock, SystemClock>();
 
         return services;
     }
