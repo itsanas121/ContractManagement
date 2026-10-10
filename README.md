@@ -28,13 +28,14 @@ Built as a team assignment in the AZEM Technical Internship Program at Saudi AZM
 | Backend | ASP.NET Core Web API (.NET 10) |
 | Data | Entity Framework Core 10, SQL Server |
 | API docs | Swagger (Swashbuckle) |
-| Frontend | Angular *(in progress)* |
+| Frontend | Angular 22 with Angular Material |
 | Auth | JWT with role-based authorization *(in progress)* |
 
 ## Project structure
 
 ```
 ContractManagement/
+├── frontend/                               # Angular application (see frontend/README.md)
 ├── src/
 │   ├── ContractManagement.Core/            # Domain + Application
 │   │   ├── Domain/                         # Entities, enums, domain exceptions (business rules)
@@ -94,6 +95,13 @@ dotnet run --project src/ContractManagement.Api
 Then open Swagger at `http://localhost:<port>/swagger` (the port is shown in the terminal).
 
 > **Secrets** (database passwords, JWT signing keys) go in `dotnet user-secrets`, never in `appsettings` files.
+
+## Frontend
+
+The shared Angular application is in `frontend/`.
+
+See [frontend setup instructions](frontend/README.md) for installation,
+API configuration, folder conventions, and feature development.
 
 ## Contract lifecycle
 
