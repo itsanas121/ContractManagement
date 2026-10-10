@@ -86,7 +86,15 @@ dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;
 dotnet ef database update --project src/ContractManagement.Infrastructure --startup-project src/ContractManagement.Api
 ```
 
-### 4. Run the API
+### 4. Configure JWT secret
+
+Set the JWT signing key using user secrets:
+
+```bash
+dotnet user-secrets set "Jwt:Key" "your-long-random-secret-key" --project src/ContractManagement.Api
+```
+
+### 5. Run the API
 
 ```bash
 dotnet run --project src/ContractManagement.Api

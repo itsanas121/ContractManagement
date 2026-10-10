@@ -36,6 +36,7 @@ namespace ContractManagement.Api.ExceptionHandling;
                 NotFoundException => StatusCodes.Status404NotFound,
                 InvalidContractStatusException => StatusCodes.Status409Conflict,
                 ContractActivationException => StatusCodes.Status409Conflict,
+                InvalidCredentialsException => StatusCodes.Status401Unauthorized,
                 DomainException => StatusCodes.Status400BadRequest,
 
                 _ => StatusCodes.Status500InternalServerError
@@ -44,6 +45,7 @@ namespace ContractManagement.Api.ExceptionHandling;
             var title = exception switch
             {
                 NotFoundException => "Not Found",
+                InvalidCredentialsException => "Unauthorized",
                 DomainException => "Business Rule Violation",
 
                 _ => "Internal Server Error"
