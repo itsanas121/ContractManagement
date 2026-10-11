@@ -38,10 +38,6 @@ public class AuthenticationService : IAuthenticationService
             throw new InvalidCredentialsException();
             
         }
-        if (!user.IsActive)
-        {
-            throw new DomainException("User account is inactive.");
-        }
 
         var passwordResult = _passwordHasher.VerifyHashedPassword(
             user,
@@ -53,6 +49,10 @@ public class AuthenticationService : IAuthenticationService
             throw new InvalidCredentialsException();
         }
 
+        if (!user.IsActive)
+        {
+            throw new DomainException("User account is inactive.");
+        }
 
         var token = _jwtTokenGenerator.GenerateToken(user);
 
