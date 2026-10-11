@@ -10,6 +10,21 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Name of the CORS policy; used both when registering and when applying it.
+const string AngularCorsPolicy = "AngularApp";
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(AngularCorsPolicy, policy => policy
+        .WithOrigins(allowedOrigins)
+        // Headers the Angular app sends: the JWT and the JSON body type.
+        .WithHeaders("Authorization", "Content-Type")
+        .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE"));
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -67,6 +82,8 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
+
+app.UseCors(AngularCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
