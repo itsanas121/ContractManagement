@@ -4,4 +4,7 @@
     <Project Path="src/ContractManagement.Core/ContractManagement.Core.csproj" />
     <Project Path="src/ContractManagement.Infrastructure/ContractManagement.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ContractManagement.Core.Tests/ContractManagement.Core.Tests.csproj" />
+  </Folder>
 </Solution>
