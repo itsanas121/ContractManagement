@@ -87,10 +87,10 @@ dotnet ef database update --project src/ContractManagement.Infrastructure --star
 
 ### 4. Configure JWT secret
 
-Set the JWT signing key using user secrets:
+Set the JWT signing key using user secrets. The JWT signing key must be at least 32 characters (256 bits):
 
 ```bash
-dotnet user-secrets set "Jwt:Key" "your-long-random-secret-key" --project src/ContractManagement.Api
+dotnet user-secrets set "Jwt:Key" "your-very-long-random-secret-key-32chars-min" --project src/ContractManagement.Api
 ```
 
 ### 5. Run the API
