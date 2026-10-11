@@ -65,6 +65,7 @@ namespace ContractManagement.Core.Application.Services
                     company.Status
                 });
 
+            // save changes and commit transaction
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
