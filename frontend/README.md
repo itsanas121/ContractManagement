@@ -51,8 +51,21 @@ configuration before release.
 Environment files are public frontend configuration. Never put secrets,
 passwords, credentials, or JWT signing keys in them.
 
-Swagger (S1-05), backend CORS, and Angular authentication integration (S1-10)
-are tracked separately.
+Authentication and CORS are described in the next section.
+
+## Authentication and CORS
+
+- The API accepts browser requests only from the origins listed in `Cors:AllowedOrigins`
+  (`src/ContractManagement.Api/appsettings.Development.json`). In development this is
+  `http://localhost:4200`. Open the app through `localhost`, not `127.0.0.1`.
+- Login: `POST /api/auth/login` with `{ email, password }`; the response is `{ token }`.
+- `AuthService` (`core/auth`) stores the JWT in `sessionStorage`; it is cleared when the tab closes.
+- `authInterceptor` adds `Authorization: Bearer <token>` only to requests sent to
+  `environment.apiUrl`. On HTTP 401 it clears the session and redirects to
+  `/login?returnUrl=...`. HTTP 403 keeps the session.
+- `authGuard` protects a route when added to its `canActivate`. Guards are a usability
+  feature only; the API enforces authorization.
+- There is no login page yet. `/login` is the route the guard and interceptor redirect to.
 
 ## Structure
 
