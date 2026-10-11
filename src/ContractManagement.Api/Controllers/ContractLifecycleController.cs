@@ -1,3 +1,4 @@
+using ContractManagement.Core.Domain.Enums;
 using ContractManagement.Core.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,9 +18,11 @@ public class ContractLifecycleController : ControllerBase
     }
 
     [HttpPost("{id:int}/submit")]
+    [Authorize(Roles = nameof(UserRole.ContractManager))]  
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Submit(int id, CancellationToken cancellationToken)

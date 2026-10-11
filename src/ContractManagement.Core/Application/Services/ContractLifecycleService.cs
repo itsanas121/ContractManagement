@@ -24,7 +24,7 @@ public class ContractLifecycleService : IContractLifecycleService
         var contract = await LoadContractAsync(contractId, cancellationToken);
 
         if (contract.OwnerId != _currentUser.UserId)
-            throw new DomainException("Only the contract owner can submit it for review.");
+            throw new ForbiddenException("Only the contract owner can submit it for review.");
 
         var oldStatus = contract.Status;
         contract.SubmitForReview();
