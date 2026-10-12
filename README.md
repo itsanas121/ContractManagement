@@ -48,6 +48,21 @@ ContractManagement/
 
 Dependencies point inward: **Api → Infrastructure → Core**. The Core project defines interfaces (such as `IAppDbContext` and `IAuditService`) and Infrastructure implements them, so business logic does not depend on the database.
 
+## Design diagrams
+
+The reference design is in `docs/diagrams/`.
+
+| Diagram | File |
+|---|---|
+| Entity-relationship diagram (ERD) | [erd.svg](docs/diagrams/erd.svg) |
+| Business process flow | [business-process-flow.svg](docs/diagrams/business-process-flow.svg) |
+| Contract lifecycle (states) | [contract-lifecycle.svg](docs/diagrams/contract-lifecycle.svg) |
+| High-level architecture (Angular app + 3 backend projects) | [high-level-architecture.svg](docs/diagrams/high-level-architecture.svg) |
+
+See the [design diagrams](docs/diagrams/README.md) .
+Each diagram includes Mermaid source and an SVG export.
+
+
 ## Getting started
 
 ### Prerequisites
