@@ -10,4 +10,12 @@ public interface IUserService
     Task<UserResponse> CreateAsync(
         CreateUserRequest request,
         CancellationToken cancellationToken = default);
+
+    Task ActivateAsync(
+        int userId,
+        CancellationToken cancellationToken = default);
+
+    Task DeactivateAsync(
+        int userId,
+        CancellationToken cancellationToken = default);
 }
