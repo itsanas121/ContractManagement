@@ -3,8 +3,7 @@ using ContractManagement.Core.Domain.Enums;
 using ContractManagement.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client.NativeInterop;
-// using ContractManagement.Domain.Entities; // <<-- uncomment/replace with the actual namespace that defines `User`
+
 
 namespace ContractManagement.Api.Seeding;
 
@@ -14,6 +13,7 @@ public static class DevelopmentDataSeeder
         IServiceProvider serviceProvider,
         IConfiguration configuration)
     {
+
         using var scope = serviceProvider.CreateScope();
 
         var environment = scope.ServiceProvider
@@ -28,16 +28,6 @@ public static class DevelopmentDataSeeder
         var passwordHasher = scope.ServiceProvider
             .GetRequiredService<IPasswordHasher<User>>();
 
-        var adminEmail = configuration["BootStrap:AdminEmail"]?.Trim();
-        var adminPassword = configuration["BootStrap:AdminPassword"];
-
-        if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
-        {
-            throw new InvalidOperationException(
-                "Configure Bootstrap:AdminEmail and " +
-                "Bootstrap:AdminPassword in user secrets.");
-        }
-
         // Safety: this seed is only for SQL server localdb
         var dataSource = db.Database.GetDbConnection().DataSource;
 
@@ -49,105 +39,142 @@ public static class DevelopmentDataSeeder
                 "Development seeding requires a local LocalDB database.");
         }
 
-        // Apply existing EF Core migrations
+        // Read companies, users and password from configuration
+        var options = configuration
+            .GetSection("SeedData")
+            .Get<SeedDataOptions>()
+            ?? throw new InvalidOperationException(
+                "SeedData Configuration is missing");
+
+        if (string.IsNullOrWhiteSpace(options.Password))
+            throw new InvalidOperationException(
+                "Configure SeedData:Password in User Secrets.");
+
+        if (options.Companies.Count == 0 ||
+            options.Users.Count == 0)
+            throw new InvalidOperationException(
+                "Configure at least one company and one user.");
+
+        // Apply EF Core migrations
         await db.Database.MigrateAsync();
 
-        // Find or create the development company
-        const string registrationNumber = "DEV-CMS-001";
+        // Both company and user inserts succeed together, or neither is commited
+        await using var transaction =
+            await db.Database.BeginTransactionAsync();
 
-        var company = await db.Companies
-            .SingleOrDefaultAsync(c => c.RegistrationNumber == registrationNumber);
+        // Seed companies
+        var companies = new Dictionary<string, Company>(
+            StringComparer.OrdinalIgnoreCase);
 
-        if (company is null)
+        foreach (var item in options.Companies)
         {
-            company = new Company(
-                name: "CMS Development Company",
-                registrationNumber: registrationNumber,
-                null, null, null
-            );
-            db.Companies.Add(company);
+            if (string.IsNullOrWhiteSpace(item.RegistrationNumber))
+                throw new InvalidOperationException(
+                    "Company registration number is required.");
+
+            if (companies.ContainsKey(item.RegistrationNumber))
+                throw new InvalidOperationException(
+                    $"Duplicate seed company: {item.RegistrationNumber}");
+
+            var company = await db.Companies
+                .SingleOrDefaultAsync(c =>
+                c.RegistrationNumber == item.RegistrationNumber);
+
+            if (company is null)
+            {
+                company = new Company(
+                    item.Name,
+                    item.RegistrationNumber,
+                    item.Email,
+                    item.Phone,
+                    item.Address);
+                db.Companies.Add(company);
+            }
+
+            if (!company.IsActive)
+                throw new InvalidOperationException(
+                    $"Seed company {item.RegistrationNumber} is inactive.");
+
+            companies.Add(item.RegistrationNumber, company);
         }
 
-        if (!company.IsActive)
-            throw new InvalidOperationException(
-                "Bootstrap company must be active.");
+        // Save companies first to generate their database IDs.
+        await db.SaveChangesAsync();
 
-        // Define the three development users
-        var users = new[]
-        {
-            (
-            Email: adminEmail,
-            FirstName: "Development",
-            LastName: "Admin",
-            EmployeeNumber: "DEV-ADMIN-01",
-            Role: UserRole.Administrator
-            ),
-            (
-            Email: adminEmail,
-            FirstName: "Development",
-            LastName: "Manager",
-            EmployeeNumber: "DEV-MANAGER-01",
-            Role: UserRole.ContractManager
-            ),
-            (
-            Email: adminEmail,
-            FirstName: "Development",
-            LastName: "Admin",
-            EmployeeNumber: "DEV-REVIEWER-01",
-            Role: UserRole.Reviewer
-            ),
-        };
+        // Seed users
+        var emails = new HashSet<string>(
+            StringComparer.OrdinalIgnoreCase);
 
-        foreach (var user in users)
+        foreach (var item in options.Users)
         {
+            if (string.IsNullOrWhiteSpace(item.Email) ||
+                !emails.Add(item.Email))
+                throw new InvalidOperationException(
+                    $"Invalid or duplicate seed email: {item.Email}");
+
+            if (string.IsNullOrWhiteSpace(item.CompanyRegistrationNumber) ||
+                !companies.TryGetValue(
+                    item.CompanyRegistrationNumber,
+                    out var company))
+                throw new InvalidOperationException(
+                    $"Company not configured for user {item.Email}.");
+
+            if (!Enum.TryParse<UserRole>(
+                item.Role, true, out var role) ||
+                !Enum.IsDefined(role))
+                throw new InvalidOperationException(
+                    $"invalid role for user {item.Email}");
+
+
             var existingUser = await db.Users
-                .SingleOrDefaultAsync(u => u.Email == user.Email);
+                .SingleOrDefaultAsync(u => u.Email == item.Email);
+
 
             if (existingUser is not null)
             {
-                if (existingUser.Role != user.Role ||
-                        !existingUser.IsActive ||
-                        existingUser.CompanyId != company.Id)
+                if (existingUser.Role != role ||
+                    existingUser.CompanyId != company.Id ||
+                    existingUser.EmployeeNumber != item.EmployeeNumber ||
+                    !existingUser.IsActive)
                 {
                     throw new InvalidOperationException(
-                        $"Existing user {existingUser.Email} "+
-                        "dose not match the expected seed data."
+                        $"Existing user {item.Email} " +
+                        "does not match the seed configuration.");
                 }
                 continue;
             }
 
             //temp object used only for hasing the password
             var temporaryUser = new User(
-                user.FirstName,
-                user.LastName,
-                user.Email,
-                user.EmployeeNumber,
+                item.FirstName,
+                item.LastName,
+                item.Email,
+                item.EmployeeNumber,
                 "temporary-placeholder", //dummy value
-                user.Role,
+                role,
                 company);
 
             var passwordHash = passwordHasher.HashPassword(
                 temporaryUser,
-                adminPassword);
+                options.Password);
 
             //Create the real user
             var dummyUser = new User(
-                user.FirstName,
-                user.LastName,
-                user.Email,
-                user.EmployeeNumber,
+                item.FirstName,
+                item.LastName,
+                item.Email,
+                item.EmployeeNumber,
                 passwordHash,
-                user.Role,
+                role,
                 company
                 );
 
-            db.Users.Add(dummyUser)
+            db.Users.Add(dummyUser);
         }
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
+
+
 }
-
-
-
-
