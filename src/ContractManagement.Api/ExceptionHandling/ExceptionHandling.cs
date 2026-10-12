@@ -37,6 +37,7 @@ namespace ContractManagement.Api.ExceptionHandling;
                 InvalidContractStatusException => StatusCodes.Status409Conflict,
                 ContractActivationException => StatusCodes.Status409Conflict,
                 InvalidCredentialsException => StatusCodes.Status401Unauthorized,
+                ForbiddenException => StatusCodes.Status403Forbidden,
                 DomainException => StatusCodes.Status400BadRequest,
 
                 _ => StatusCodes.Status500InternalServerError
@@ -46,6 +47,7 @@ namespace ContractManagement.Api.ExceptionHandling;
             {
                 NotFoundException => "Not Found",
                 InvalidCredentialsException => "Unauthorized",
+                ForbiddenException => "Forbidden",
                 DomainException => "Business Rule Violation",
 
                 _ => "Internal Server Error"
@@ -81,4 +83,3 @@ namespace ContractManagement.Api.ExceptionHandling;
             return true;
         }
     }
-

@@ -32,6 +32,9 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+        services.AddScoped<IContractLifecycleService, ContractLifecycleService>();
+        
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<ICompanyService, CompanyService>();
 
