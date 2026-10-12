@@ -10,9 +10,9 @@ For editing instructions, see [Maintenance](README.md#maintenance).
 ## Mermaid source
 
 ```text
-***
+---
 title: Contract Management System - ERD
-***
+---
 erDiagram
     Company ||--o{ User : employs
     Company ||--o{ Contract : owns
@@ -78,7 +78,7 @@ erDiagram
         decimal ContractValue "decimal(18,2)"
         date StartDate
         date EndDate
-        string ContractType "optional, sample request omits it"
+        string ContractType "Sales | Procurement | Service | Partnership | Other"
         string Status "Draft | UnderReview | Approved | Rejected | Active | Expired | Terminated"
         datetime CreatedDate
         int ApprovedById FK
@@ -87,7 +87,7 @@ erDiagram
         datetime RejectedDate
         string RejectionReason
         int TerminatedById FK
-        datetime TerminatedDate
+        datetime TerminationDate 
         string TerminationReason
         binary RowVersion "assumption: concurrency"
     }

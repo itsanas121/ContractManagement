@@ -9,9 +9,9 @@ The Mermaid source below is included for future editing.
 For editing instructions, see [Maintenance](README.md#maintenance).
 ## Mermaid source
 ```text
-***
+---
 title: Contract Business Process
-***
+---
 flowchart TB
     subgraph ADM["Administrator"]
         direction TB
@@ -26,6 +26,8 @@ flowchart TB
         M1["Create Contract (active User, active Company)"]
         M2["Add Parties and Documents"]
         M3["Submit"]
+        R2["Activate"]
+        R3["Terminate (reason required)"]
         M1 --> M2
         M2 --> M3
     end
@@ -33,8 +35,6 @@ flowchart TB
     subgraph REV["Reviewer (A)"]
         direction TB
         R1{"Approve or Reject?"}
-        R2["Activate"]
-        R3["Terminate (reason required)"]
     end
 
     subgraph SYS["System"]

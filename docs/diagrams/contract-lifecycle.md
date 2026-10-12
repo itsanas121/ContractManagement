@@ -11,7 +11,7 @@ For editing instructions, see [Maintenance](README.md#maintenance).
 
 ```text
 ---
-title: CContract Lifecycle
+title: Contract Lifecycle
 ---
 stateDiagram
   direction LR
@@ -29,10 +29,10 @@ stateDiagram
   Expired --> [*]
   Terminated --> [*]
   Rejected --> [*]
-  note right of Draft 
-  Submit requires: title, valid dates, value > 0,
-        1+ Party, 1+ Document, Company Active
-  end note
+      note right of Draft
+        Created with: title, valid dates, value > 0
+        Submit requires: 1+ Party, 1+ Document, Company Active
+    end note
   note right of Approved 
   Activate requires: StartDate reached, Company Active,
         1+ Party, (A) EndDate not in the past

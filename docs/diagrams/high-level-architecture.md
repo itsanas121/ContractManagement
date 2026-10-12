@@ -10,9 +10,9 @@ For editing instructions, see [Maintenance](README.md#maintenance).
 ## Mermaid source
 
 ```
-***
+---
 title: High-Level Architecture
-***
+---
 flowchart TB
     subgraph FE["Frontend - Angular app (separate folder: frontend/)"]
         direction TB
