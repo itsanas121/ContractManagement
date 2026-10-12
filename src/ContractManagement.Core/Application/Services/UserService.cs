@@ -166,5 +166,74 @@ public class UserService : IUserService
         };
 
     }
-}
 
+    public async Task ActivateAsync(
+        int userId,
+        CancellationToken cancellationToken) 
+    {
+        // find user and load their company
+        var user = await _dbContext.Users
+            .Include(u => u.Company)
+            .FirstOrDefaultAsync(
+            u => u.Id == userId,
+            cancellationToken);
+
+        if (user is null)
+            throw new NotFoundException("User", userId);
+
+        if (user.IsActive)
+            throw new DomainException("User is already active.");
+
+        // Save previous status for audit logging
+        var oldStatus = user.Status;
+
+        // Activate the user
+        user.Activate();
+
+        // Record status change
+        _auditService.Log(
+            AuditEntityType.User,
+            user.Id,
+            AuditAction.Activated,
+            _currentUser.UserId,
+            oldValue: new { Status = oldStatus },
+            newValue: new { Status = user.Status });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeactivateAsync(
+        int userId,
+        CancellationToken cancellationToken)
+    {
+        // find user and load their company
+        var user = await _dbContext.Users
+            .Include(u => u.Company)
+            .FirstOrDefaultAsync(
+            u => u.Id == userId,
+            cancellationToken);
+
+        if (user is null)
+            throw new NotFoundException("User", userId);
+
+        if (user.IsActive)
+            throw new DomainException("User is already inactive.");
+
+        // Save previous status for audit logging
+        var oldStatus = user.Status;
+
+        // Activate the user
+        user.Deactivate();
+
+        // Record status change
+        _auditService.Log(
+            AuditEntityType.User,
+            user.Id,
+            AuditAction.Deactivated,
+            _currentUser.UserId,
+            oldValue: new { Status = oldStatus },
+            newValue: new { Status = user.Status });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+}
