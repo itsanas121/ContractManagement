@@ -32,7 +32,7 @@ public static class DevelopmentDataSeeder
         var dataSource = db.Database.GetDbConnection().DataSource;
 
         if (!dataSource.StartsWith(
-            "localdb)\\",
+            "(localdb)\\",
             StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(

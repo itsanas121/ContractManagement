@@ -6,6 +6,7 @@ using ContractManagement.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using ContractManagement.Api.Seeding;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -60,6 +61,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    await DevelopmentDataSeeder.SeedAsync(
+        app.Services,
+        app.Configuration);
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }
