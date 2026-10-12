@@ -29,7 +29,7 @@ Built as a team assignment in the AZEM Technical Internship Program at Saudi AZM
 | Data | Entity Framework Core 10, SQL Server |
 | API docs | Swagger (Swashbuckle) |
 | Frontend | Angular 22 with Angular Material |
-| Auth | JWT with role-based authorization *(in progress)* |
+| Auth | JWT with role-based authorization |
 
 ## Project structure
 
