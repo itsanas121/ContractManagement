@@ -1,10 +1,159 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ContractManagement.Core.Application.Common;
+using ContractManagement.Core.Application.DTOs.Users;
+using ContractManagement.Core.Domain.Entities;
+using ContractManagement.Core.Domain.Enums;
+using ContractManagement.Core.Domain.Exceptions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContractManagement.Core.Application.Services;
 
 public class UserService : IUserService
 {
+    private readonly IAppDbContext _dbContext;
+    private readonly IAuditService _auditService;
+    private readonly ICurrentUser _currentUser;
+    private readonly IPasswordHasher<User> _passwordHasher;
+
+    public UserService(
+        IAppDbContext dbContext,
+        IAuditService auditService,
+        ICurrentUser currentUser,
+        IPasswordHasher<User> passwordHasher)
+    {
+        _dbContext = dbContext;
+        _auditService = auditService;
+        _currentUser = currentUser;
+        _passwordHasher = passwordHasher;
+    }
+
+    public async Task<UserResponse> CreateAsync(
+        CreateUserRequest request,
+        CancellationToken cancellationToken = default)
+    {
+
+        // validate the password and role
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new DomainException("Password is required.");
+
+        if (request.Role is null ||
+            !Enum.IsDefined(request.Role.Value))
+            throw new DomainException("A valid user role is required.");
+
+        var role = request.Role.Value;
+
+        // find the company
+        var company = await _dbContext.Companies
+            .FirstOrDefaultAsync(
+            c => c.Id == request.CompanyId,
+            cancellationToken);
+
+        if (company is null)
+            throw new NotFoundException("Company", request.CompanyId);
+
+        if (!company.IsActive)
+            throw new DomainException(
+                "Cannot register a user under an inactive company.");
+
+
+        var firstName = request.FirstName?.Trim() ?? "";
+        var lastName = request.LastName?.Trim() ?? "";
+        var email = request.Email?.Trim() ?? "";
+        var employeeNumber = request.EmployeeNumber?.Trim() ?? "";
+
+        var emailExists = await _dbContext.Users
+            .AnyAsync(
+            u => u.Email == email,
+            cancellationToken);
+
+        if (emailExists)
+            throw new DomainException(
+                "A user with this email already exists.");
+
+
+        var employeeNumberExists = await _dbContext.Users
+            .AnyAsync(
+            u => u.CompanyId == company.Id &&
+                u.EmployeeNumber == employeeNumber,
+            cancellationToken);
+
+        if (employeeNumberExists)
+            throw new DomainException(
+                "Employee number already exists in this comapny.");
+
+        // Create temporary user for passwordhashing
+        var temporaryUser = new User(
+            firstName,
+            lastName,
+            email,
+            employeeNumber,
+            "temporary-placeholder",
+            role,
+            company);
+
+        var passwordHash = _passwordHasher.HashPassword(
+            temporaryUser,
+            request.Password);
+
+        // Create the actual user with hashed password
+        var user = new User(
+            firstName,
+            lastName,
+            email,
+            employeeNumber,
+            passwordHash,
+            role,
+            company);
+
+
+        // Start DB Transaction
+        await using var transaction =
+            await _dbContext.BeginTransactionAsync(cancellationToken);
+
+        _dbContext.Users.Add(user);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Record user creation in audit
+        _auditService.Log(
+            AuditEntityType.User,
+            user.Id,
+            AuditAction.Created,
+            _currentUser.UserId,
+            newValue: new
+            {
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.EmployeeNumber,
+                user.Role,
+                user.Status,
+                user.CompanyId
+            });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return new UserResponse
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            EmployeeNumber = user.EmployeeNumber,
+            Role = user.Role,
+            Status = user.Status,
+            CompanyId = user.CompanyId,
+            CreatedAt = user.CreatedDate
+        };
+
+    }
+
+            
+
+    }
+
+    
+
 
 }
