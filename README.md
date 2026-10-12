@@ -29,7 +29,7 @@ Built as a team assignment in the AZEM Technical Internship Program at Saudi AZM
 | Data | Entity Framework Core 10, SQL Server |
 | API docs | Swagger (Swashbuckle) |
 | Frontend | Angular 22 with Angular Material |
-| Auth | JWT with role-based authorization *(in progress)* |
+| Auth | JWT with role-based authorization |
 
 ## Project structure
 
@@ -108,6 +108,91 @@ Set the JWT signing key using user secrets. The JWT signing key must be at least
 ```bash
 dotnet user-secrets set "Jwt:Key" "your-very-long-random-secret-key-32chars-min" --project src/ContractManagement.Api
 ```
+
+### 4.1. Development Database Seeding
+
+The API automatically seeds development data on startup using the
+`SeedData` configuration in `appsettings.Development.json`.
+
+This allows developers to test authentication and role-based APIs
+without manually inserting records into SQL Server.
+
+#### Default Company
+
+| Name | Registration Number | Status |
+|---|---|---|
+| CMS Development | DEV-CMS-001 | Active |
+
+#### Default Users
+
+| Email | Role | Employee Number |
+|---|---|---|
+| admin@cms.local | Administrator | DEV-ADMIN |
+| manager@cms.local | ContractManager | DEV-MANAGER |
+| reviewer@cms.local | Reviewer | DEV-REVIEWER |
+
+#### Configure the Development Password
+
+All seeded users share **one development password**, configured
+locally through User Secrets.
+
+Run from the repository root:
+
+```bash
+dotnet user-secrets set "SeedData:Password" "YOUR_STRONG_DEV_PASSWORD" --project src/ContractManagement.Api
+```
+
+Each developer can choose their own password for their local database.
+
+The same configured password is used when creating all three accounts:
+
+- `admin@cms.local`
+- `manager@cms.local`
+- `reviewer@cms.local`
+
+
+**Recommendation:** Choose your development password before the
+first startup and keep it consistent.
+
+#### Configuration-Driven Seed Data
+
+Companies and users are defined in:
+
+`src/ContractManagement.Api/appsettings.Development.json`
+
+Developers can add more companies and users by updating the
+`SeedData:Companies` and `SeedData:Users` arrays.
+
+Each user specifies the company they belong to using
+`CompanyRegistrationNumber`.
+
+
+#### Testing Authentication
+
+Once the API starts, log in using any of the seeded accounts:
+
+**Endpoint:** `POST /api/auth/login`
+
+Example request:
+
+```json
+{
+  "email": "admin@cms.local",
+  "password": "YOUR_STRONG_DEV_PASSWORD"
+}
+```
+
+A successful login returns a JWT.
+
+Use the returned token in protected API requests:
+
+`Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Role-based testing:**
+
+- **Administrator:** Can access company management endpoints.
+- **ContractManager:** Can access permitted contract management operations.
+- **Reviewer:** Can access permitted contract review operations.
 
 ### 5. Run the API
 
