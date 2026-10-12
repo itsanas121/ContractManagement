@@ -34,4 +34,32 @@ public class UserController : ControllerBase
             StatusCodes.Status201Created,
             response);
     }
+
+    [HttpPost("{id:int}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Activate(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        await _userService.ActivateAsync(
+            id,
+            cancellationToken);
+
+        return NoContent();
+    }
+
+
+    [HttpPost("{id:int}/deactivate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Deactivate(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        await _userService.DeactivateAsync(
+            id,
+            cancellationToken);
+
+        return NoContent();
+    }
+
 }
