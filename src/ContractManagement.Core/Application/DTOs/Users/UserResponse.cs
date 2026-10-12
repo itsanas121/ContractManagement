@@ -20,4 +20,6 @@ public class UserResponse
     public int CompanyId { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public UserProfileDto? Profile { get; set; }
 }

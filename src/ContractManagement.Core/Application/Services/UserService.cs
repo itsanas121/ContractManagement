@@ -105,6 +105,14 @@ public class UserService : IUserService
             role,
             company);
 
+        if (request.Profile is not null)
+        {
+            user.SetProfile(
+                request.Profile.JobTitle,
+                request.Profile.Department,
+                request.Profile.PhoneNumber);
+        }
+
 
         // Start DB Transaction
         await using var transaction =
@@ -134,6 +142,7 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
+
         return new UserResponse
         {
             Id = user.Id,
@@ -144,16 +153,18 @@ public class UserService : IUserService
             Role = user.Role,
             Status = user.Status,
             CompanyId = user.CompanyId,
-            CreatedAt = user.CreatedDate
+            CreatedAt = user.CreatedDate,
+
+            Profile = user.Profile is null 
+                ? null
+                : new UserProfileDto
+                {
+                    JobTitle = user.Profile.JobTitle,
+                    Department = user.Profile.Department,
+                    PhoneNumber = user.Profile.PhoneNumber
+                }
         };
 
     }
-
-            
-
-    }
-
-    
-
-
 }
+

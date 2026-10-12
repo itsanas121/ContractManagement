@@ -16,4 +16,6 @@ public class CreateUserRequest
     public UserRole? Role { get; set; }
     public int CompanyId { get; set; }
 
+    public UserProfileDto? Profile { get; set; }
+
 }
