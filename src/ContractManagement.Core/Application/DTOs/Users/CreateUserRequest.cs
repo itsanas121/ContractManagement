@@ -13,7 +13,7 @@ public class CreateUserRequest
     public string EmployeeNumber { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 
-    public UserRole Role { get; set; }
+    public UserRole? Role { get; set; }
     public int CompanyId { get; set; }
 
 }
