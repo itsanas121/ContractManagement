@@ -1,12 +1,13 @@
 using ContractManagement.Api.ExceptionHandling;
-using ContractManagement.Core.Domain.Exceptions;
+using ContractManagement.Api.Seeding;
 using ContractManagement.Api.Services;
+using ContractManagement.Api.Authentication;
 using ContractManagement.Core.Application.Common;
 using ContractManagement.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
-using ContractManagement.Api.Seeding;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<JwtBearerErrorEvents>();
 
 
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -31,7 +33,7 @@ builder.Services
     .AddJwtBearer(options => 
     {
         // Keep JWT claim names unchanged, such as "sub" and "role".
-        options.MapInboundClaims = false; 
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -52,6 +54,7 @@ builder.Services
                 System.Text.Encoding.UTF8.GetBytes(jwtKey)
                 )
         };
+        options.EventsType = typeof(JwtBearerErrorEvents);
     });
 
 builder.Services.AddAuthorization();
