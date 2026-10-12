@@ -109,6 +109,111 @@ Set the JWT signing key using user secrets. The JWT signing key must be at least
 dotnet user-secrets set "Jwt:Key" "your-very-long-random-secret-key-32chars-min" --project src/ContractManagement.Api
 ```
 
+### 4.1. Development Database Seeding
+
+The API automatically seeds development data on startup using the
+`SeedData` configuration in `appsettings.Development.json`.
+
+This allows developers to test authentication and role-based APIs
+without manually inserting records into SQL Server.
+
+#### Default Company
+
+| Name | Registration Number | Status |
+|---|---|---|
+| CMS Development | DEV-CMS-001 | Active |
+
+#### Default Users
+
+| Email | Role | Employee Number |
+|---|---|---|
+| admin@cms.local | Administrator | DEV-ADMIN |
+| manager@cms.local | ContractManager | DEV-MANAGER |
+| reviewer@cms.local | Reviewer | DEV-REVIEWER |
+
+#### Configure the Development Password
+
+All seeded users share **one development password**, configured
+locally through User Secrets.
+
+Run from the repository root:
+
+```bash
+dotnet user-secrets set "SeedData:Password" "YOUR_STRONG_DEV_PASSWORD" --project src/ContractManagement.Api
+```
+
+Each developer can choose their own password for their local database.
+
+The same configured password is used when creating all three accounts:
+
+- `admin@cms.local`
+- `manager@cms.local`
+- `reviewer@cms.local`
+
+
+**Important Password Behavior:**
+
+- On the first run, all three users are created with the configured password.
+- Changing `SeedData:Password` before the first run changes the initial password for all three users.
+- Changing `SeedData:Password` after users have been created **does not update their existing passwords**.
+- Existing accounts are skipped during subsequent seeding runs.
+- Newly added seed users will use the currently configured password.
+- To change existing users' passwords, use an explicit password-reset process or recreate the local test database.
+
+**Recommendation:** Choose your development password before the
+first startup and keep it consistent.
+
+#### Configuration-Driven Seed Data
+
+Companies and users are defined in:
+
+`src/ContractManagement.Api/appsettings.Development.json`
+
+Developers can add more companies and users by updating the
+`SeedData:Companies` and `SeedData:Users` arrays.
+
+Each user specifies the company they belong to using
+`CompanyRegistrationNumber`.
+
+#### Seeder Behavior
+
+- Runs automatically during API startup in Development.
+- Currently supports SQL Server LocalDB only.
+- Applies pending EF Core migrations.
+- Creates missing companies and users.
+- Prevents duplicate records.
+- Validates existing user roles, company assignments, and status.
+- Does not overwrite existing users or reset passwords.
+- Uses a database transaction for company and user creation.
+- Stops startup if seed data conflicts with existing records.
+
+#### Testing Authentication
+
+Once the API starts, log in using any of the seeded accounts:
+
+**Endpoint:** `POST /api/auth/login`
+
+Example request:
+
+```json
+{
+  "email": "admin@cms.local",
+  "password": "YOUR_STRONG_DEV_PASSWORD"
+}
+```
+
+A successful login returns a JWT.
+
+Use the returned token in protected API requests:
+
+`Authorization: Bearer YOUR_JWT_TOKEN`
+
+**Role-based testing:**
+
+- **Administrator:** Can access company management endpoints.
+- **ContractManager:** Can access permitted contract management operations.
+- **Reviewer:** Can access permitted contract review operations.
+
 ### 5. Run the API
 
 ```bash
