@@ -151,15 +151,6 @@ The same configured password is used when creating all three accounts:
 - `reviewer@cms.local`
 
 
-**Important Password Behavior:**
-
-- On the first run, all three users are created with the configured password.
-- Changing `SeedData:Password` before the first run changes the initial password for all three users.
-- Changing `SeedData:Password` after users have been created **does not update their existing passwords**.
-- Existing accounts are skipped during subsequent seeding runs.
-- Newly added seed users will use the currently configured password.
-- To change existing users' passwords, use an explicit password-reset process or recreate the local test database.
-
 **Recommendation:** Choose your development password before the
 first startup and keep it consistent.
 
@@ -175,17 +166,6 @@ Developers can add more companies and users by updating the
 Each user specifies the company they belong to using
 `CompanyRegistrationNumber`.
 
-#### Seeder Behavior
-
-- Runs automatically during API startup in Development.
-- Currently supports SQL Server LocalDB only.
-- Applies pending EF Core migrations.
-- Creates missing companies and users.
-- Prevents duplicate records.
-- Validates existing user roles, company assignments, and status.
-- Does not overwrite existing users or reset passwords.
-- Uses a database transaction for company and user creation.
-- Stops startup if seed data conflicts with existing records.
 
 #### Testing Authentication
 
