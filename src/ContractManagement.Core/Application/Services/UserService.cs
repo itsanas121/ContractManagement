@@ -216,7 +216,7 @@ public class UserService : IUserService
         if (user is null)
             throw new NotFoundException("User", userId);
 
-        if (user.IsActive)
+        if (!user.IsActive)
             throw new DomainException("User is already inactive.");
 
         // Save previous status for audit logging
