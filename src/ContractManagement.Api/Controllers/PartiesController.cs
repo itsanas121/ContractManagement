@@ -28,7 +28,6 @@ public class PartiesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<PartyResponse>> RegisterIndividual(
         CreateIndividualPartyRequest request, CancellationToken cancellationToken)
     {
@@ -42,7 +41,6 @@ public class PartiesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<PartyResponse>> RegisterOrganization(
         CreateOrganizationPartyRequest request, CancellationToken cancellationToken)
     {
