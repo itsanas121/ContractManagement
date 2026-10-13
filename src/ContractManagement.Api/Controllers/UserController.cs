@@ -1,4 +1,5 @@
-﻿using ContractManagement.Core.Application.DTOs.Users;
+﻿using ContractManagement.Core.Application.DTOs.Companies;
+using ContractManagement.Core.Application.DTOs.Users;
 using ContractManagement.Core.Application.Services;
 using ContractManagement.Core.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -62,4 +63,14 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet]
+    [ProducesResponseType(typeof(List<UserResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<UserResponse>>> GetAll(
+        CancellationToken cancellationToken)
+    {
+        var users = await _userService.GetAllAsync(
+            cancellationToken);
+
+        return Ok(users);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using ContractManagement.Core.Application.DTOs.Users;
+﻿using ContractManagement.Core.Application.DTOs.Companies;
+using ContractManagement.Core.Application.DTOs.Users;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,4 +19,7 @@ public interface IUserService
     Task DeactivateAsync(
         int userId,
         CancellationToken cancellationToken = default);
+
+    Task<List<UserResponse>> GetAllAsync(
+    CancellationToken cancellationToken = default);
 }

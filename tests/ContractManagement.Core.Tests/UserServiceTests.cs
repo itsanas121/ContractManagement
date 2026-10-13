@@ -224,4 +224,44 @@ public class UserServiceTests : IDisposable
             AuditAction.Activated, _audit.Calls[2].Action);
     }
 
+
+    [Fact]
+    public async Task GetAll_returns_users_with_profiles()
+    {
+        // Arrange
+        using var db = _database.CreateContext();
+
+        var company = new Company(
+            "Test Company", "TEST-001", null, null, null);
+
+        var zaid = new User(
+            "Zaid", "Ali", "zaid@test.com", "EMP-002",
+            "test-hash", UserRole.ContractManager, company);
+
+        var ahmed = new User(
+            "Ahmed", "Ali", "ahmed@test.com", "EMP-001",
+            "test-hash", UserRole.Reviewer, company);
+
+        ahmed.SetProfile("Developer", "IT", "0500000000");
+
+        db.Users.AddRange(zaid, ahmed);
+        await db.SaveChangesAsync();
+
+        var service = new UserService(
+            db, _audit, _currentUser,
+            new PasswordHasher<User>());
+
+        // Act
+        var users = await service.GetAllAsync();
+
+        // Assert
+        Assert.Equal(2, users.Count);
+
+        Assert.Equal("Ahmed", users[0].FirstName);
+        Assert.Equal("Zaid", users[1].FirstName);
+
+        Assert.Equal("Developer", users[0].Profile?.JobTitle);
+        Assert.Equal("IT", users[0].Profile?.Department);
+    }
+
 }

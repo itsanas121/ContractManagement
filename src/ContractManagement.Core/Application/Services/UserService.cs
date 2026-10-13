@@ -1,4 +1,5 @@
 ﻿using ContractManagement.Core.Application.Common;
+using ContractManagement.Core.Application.DTOs.Companies;
 using ContractManagement.Core.Application.DTOs.Users;
 using ContractManagement.Core.Domain.Entities;
 using ContractManagement.Core.Domain.Enums;
@@ -235,5 +236,36 @@ public class UserService : IUserService
             newValue: new { Status = user.Status });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<List<UserResponse>> GetAllAsync(
+    CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Users
+            .AsNoTracking()
+            .OrderByDescending(u => u.CreatedDate)
+            .ThenBy(u => u.Id)
+            .Select(u => new UserResponse
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email,
+                EmployeeNumber = u.EmployeeNumber,
+                Role = u.Role,
+                Status = u.Status,
+                CompanyId = u.CompanyId,
+                CreatedAt = u.CreatedDate,
+
+                Profile = u.Profile == null
+                ? null
+                : new UserProfileDto
+                {
+                    JobTitle = u.Profile.JobTitle,
+                    Department = u.Profile.Department,
+                    PhoneNumber = u.Profile.PhoneNumber
+                }
+            })
+        .ToListAsync(cancellationToken);
     }
 }
