@@ -55,6 +55,7 @@ public class ContractLifecycleService : IContractLifecycleService
 
     public async Task RejectAsync(int contractId, string reason, CancellationToken cancellationToken = default)
     {
+        reason = reason.Trim();
         var contract = await LoadContractAsync(contractId, cancellationToken);
         var reviewer = await LoadCurrentUserAsync(cancellationToken);
 
@@ -86,6 +87,7 @@ public class ContractLifecycleService : IContractLifecycleService
 
     public async Task TerminateAsync(int contractId, string reason, CancellationToken cancellationToken = default)
     {
+        reason = reason.Trim();
         var contract = await LoadContractAsync(contractId, cancellationToken);
         var user = await LoadCurrentUserAsync(cancellationToken);
         EnsureOwner(contract, user, "terminate");

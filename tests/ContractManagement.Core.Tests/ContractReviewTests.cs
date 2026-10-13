@@ -61,4 +61,42 @@ public class ContractReviewTests
 
         Assert.Throws<InvalidContractStatusException>(() => contract.Approve(reviewer));
     }
+    
+    [Fact]
+    public void Approve_ByInactiveReviewer_Throws()
+    {
+        var contract = TestData.NewUnderReviewContract();
+        var reviewer = TestData.NewReviewer(contract);
+        reviewer.Deactivate();
+
+        var ex = Assert.Throws<DomainException>(() => contract.Approve(reviewer));
+        Assert.Contains("Inactive", ex.Message);
+    }
+
+    [Fact]
+    public void Approve_ByReviewerFromAnotherCompany_Throws()
+    {
+        var contract = TestData.NewUnderReviewContract();
+        var otherCompany = new Company("Other Company", "1010000002", null, null, null);
+        TestData.SetId(otherCompany, 2);
+        var reviewer = new User("Khalid", "Omar", "khalid@test.com", "E005", "hash",
+            UserRole.Reviewer, otherCompany);
+        TestData.SetId(reviewer, 3);
+        TestData.SetProperty(reviewer, "CompanyId", 2);
+
+        var ex = Assert.Throws<DomainException>(() => contract.Approve(reviewer));
+        Assert.Contains("company", ex.Message);
+    }
+
+    [Fact]
+    public void Approve_ByContractOwner_Throws()
+    {
+        var contract = TestData.NewUnderReviewContract();
+        var ownerAsReviewer = new User("Sara", "Ali", "sara2@test.com", "E006", "hash",
+            UserRole.Reviewer, contract.Company);
+        TestData.SetId(ownerAsReviewer, contract.OwnerId);
+
+        var ex = Assert.Throws<DomainException>(() => contract.Approve(ownerAsReviewer));
+        Assert.Contains("owner", ex.Message);
+    }
 }

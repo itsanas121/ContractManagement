@@ -62,4 +62,28 @@ public class ContractActivationTests
         Assert.Throws<DomainException>(() => contract.Terminate(4, ""));
         Assert.Equal(ContractStatus.Active, contract.Status);
     }
+    [Fact]
+    public void Activate_Twice_ThrowsInvalidStatus()
+    {
+        var contract = TestData.NewActiveContract();
+
+        Assert.Throws<InvalidContractStatusException>(() => contract.Activate(new DateOnly(2026, 11, 2)));
+    }
+
+    [Fact]
+    public void Terminate_NotActiveContract_ThrowsInvalidStatus()
+    {
+        var contract = TestData.NewApprovedContract();
+
+        Assert.Throws<InvalidContractStatusException>(() => contract.Terminate(4, "Client ended the agreement"));
+    }
+
+    [Fact]
+    public void Terminate_WithWhitespaceReason_Throws_AndStaysActive()
+    {
+        var contract = TestData.NewActiveContract();
+
+        Assert.Throws<DomainException>(() => contract.Terminate(4, "   "));
+        Assert.Equal(ContractStatus.Active, contract.Status);
+    }
 }

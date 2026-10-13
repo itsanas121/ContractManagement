@@ -28,14 +28,6 @@ public static class TestData
         return contract;
     }
 
-    // A reviewer in the same company as the contract, with Id 2 (not the owner)
-    public static User NewReviewer(Contract contract)
-    {
-        var reviewer = new User("Omar", "Saleh", "omar@test.com", "E003", "hash",
-            UserRole.Reviewer, contract.Company);
-        SetId(reviewer, 2);
-        return reviewer;
-    }
     // An Approved contract (submitted, then approved by a reviewer)
     public static Contract NewApprovedContract()
     {
@@ -52,9 +44,21 @@ public static class TestData
         return contract;
     }
 
-    // Test-only: set a private Id, because there is no database in unit tests
-    private static void SetId(object entity, int id)
+    // A reviewer in the same company as the contract, with Id 2 (not the owner)
+    public static User NewReviewer(Contract contract)
     {
-        entity.GetType().GetProperty("Id")!.SetValue(entity, id);
+        var reviewer = new User("Omar", "Saleh", "omar@test.com", "E003", "hash",
+            UserRole.Reviewer, contract.Company);
+        SetId(reviewer, 2);
+        return reviewer;
+    }
+
+    // Test-only: set a private Id, because there is no database in unit tests
+    public static void SetId(object entity, int id) => SetProperty(entity, "Id", id);
+
+    // Test-only: set any private property (there is no database in unit tests)
+    public static void SetProperty(object entity, string propertyName, object value)
+    {
+        entity.GetType().GetProperty(propertyName)!.SetValue(entity, value);
     }
 }
