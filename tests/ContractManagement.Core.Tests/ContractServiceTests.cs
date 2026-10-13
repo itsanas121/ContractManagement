@@ -36,7 +36,7 @@ public class ContractServiceTests : IDisposable
         Assert.Empty(_audit.Calls);
     }
 
-   
+
 
     private async Task<ContractResponse> Create(CreateContractRequest request)
     {
@@ -58,6 +58,43 @@ public class ContractServiceTests : IDisposable
         return (company.Id, owner.Id);
     }
 
+    [Fact]
+    public async Task Create_with_valid_data_saves_a_draft_contract_and_writes_one_audit_entry()
+    {
+        var (companyId, ownerId) = SeedCompanyAndOwner();
+
+        var response = await Create(Request(companyId, ownerId));
+
+        Assert.True(response.Id > 0);
+        Assert.Equal(ContractStatus.Draft, response.Status);
+
+        using var context = _database.CreateContext();
+        var saved = await context.Contracts.AsNoTracking().SingleAsync();
+        Assert.Equal(response.Id, saved.Id);
+        Assert.Equal(ContractStatus.Draft, saved.Status);
+
+        var call = Assert.Single(_audit.Calls);
+        Assert.Equal(AuditEntityType.Contract, call.EntityType);
+        Assert.Equal(response.Id, call.EntityId);
+        Assert.Equal(AuditAction.Created, call.Action);
+        Assert.Equal(CurrentUserId, call.PerformedById);
+    }
+
+    [Fact]
+    public async Task Create_with_duplicate_contract_number_is_rejected_without_a_second_audit_entry()
+    {
+        var (companyId, ownerId) = SeedCompanyAndOwner();
+        await Create(Request(companyId, ownerId));
+
+        var exception = await Assert.ThrowsAsync<DomainException>(() =>
+            Create(Request(companyId, ownerId)));
+
+        Assert.Equal("A contract with the same contract number already exists.", exception.Message);
+        Assert.Single(_audit.Calls);
+
+        using var context = _database.CreateContext();
+        Assert.Equal(1, await context.Contracts.CountAsync());
+    }
     private static CreateContractRequest Request(int companyId, int ownerId) => new()
     {
         ContractNumber = "CNT-2026-001",

@@ -29,6 +29,8 @@ public class ContractService : IContractService
     {
         var contractNumber = request.ContractNumber.Trim();
         var title = request.Title.Trim();
+        var companyId = request.CompanyId!.Value;
+        var ownerId = request.OwnerId!.Value;
 
         var exists = await _dbContext.Contracts.AnyAsync(
             c => c.ContractNumber == contractNumber, cancellationToken);
@@ -37,16 +39,16 @@ public class ContractService : IContractService
             throw new DomainException("A contract with the same contract number already exists.");
 
         var company = await _dbContext.Companies
-            .FirstOrDefaultAsync(c => c.Id == request.CompanyId, cancellationToken)
-            ?? throw new NotFoundException("Company", request.CompanyId);
+            .FirstOrDefaultAsync(c => c.Id == companyId, cancellationToken)
+            ?? throw new NotFoundException("Company", companyId);
 
         var owner = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Id == request.OwnerId, cancellationToken)
-            ?? throw new NotFoundException("User", request.OwnerId);
+            .FirstOrDefaultAsync(u => u.Id == ownerId, cancellationToken)
+            ?? throw new NotFoundException("User", ownerId);
 
         var contract = new Contract(
-            contractNumber, title, request.Description, request.ContractValue,
-            request.StartDate, request.EndDate, request.ContractType!.Value, company, owner);
+            contractNumber, title, request.Description, request.ContractValue!.Value,
+            request.StartDate!.Value, request.EndDate!.Value, request.ContractType!.Value, company, owner);
 
         // The Id is generated on save, and the audit entry needs it: save, log, save again.
         await using var transaction =
