@@ -1,0 +1,46 @@
+<section class="login-page">
+  <h1>Contract Management System</h1>
+  <h2>Sign in</h2>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+
+      <input matInput
+             type="email"
+             formControlName="email" />
+
+      @if (loginForm.controls.email.hasError('required')) {
+      <mat-error>Email is required.</mat-error>
+      } @else if (loginForm.controls.email.hasError('email')) {
+      <mat-error>Enter a valid email.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+
+      <input matInput
+             type="password"
+             formControlName="password" />
+
+      @if (loginForm.controls.password.hasError('required')) {
+      <mat-error>Password is required.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (errorMessage) {
+    <p class="error-message" role="alert">
+      {{ errorMessage }}
+    </p>
+    }
+
+    <button mat-flat-button
+            type="submit"
+            [disabled]="loading">
+      {{ loading ? 'Signing in...' : 'Sign in' }}
+    </button>
+
+  </form>
+</section>
