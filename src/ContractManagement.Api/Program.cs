@@ -1,11 +1,14 @@
 using ContractManagement.Api.ExceptionHandling;
-using ContractManagement.Core.Domain.Exceptions;
+using ContractManagement.Api.Seeding;
 using ContractManagement.Api.Services;
+using ContractManagement.Api.Authentication;
 using ContractManagement.Core.Application.Common;
 using ContractManagement.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
+using System.Text.Json.Serialization;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +29,13 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter());
+    });
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); 
 builder.Services.AddSwaggerGen();
@@ -35,6 +44,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<JwtBearerErrorEvents>();
 
 
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -45,7 +55,7 @@ builder.Services
     .AddJwtBearer(options => 
     {
         // Keep JWT claim names unchanged, such as "sub" and "role".
-        options.MapInboundClaims = false; 
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -66,6 +76,7 @@ builder.Services
                 System.Text.Encoding.UTF8.GetBytes(jwtKey)
                 )
         };
+        options.EventsType = typeof(JwtBearerErrorEvents);
     });
 
 builder.Services.AddAuthorization();
@@ -75,6 +86,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    await DevelopmentDataSeeder.SeedAsync(
+        app.Services,
+        app.Configuration);
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }
