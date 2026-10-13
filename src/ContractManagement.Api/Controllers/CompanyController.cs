@@ -30,4 +30,14 @@ public class CompanyController: ControllerBase
 
         return StatusCode(StatusCodes.Status201Created, response);
     }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(List<CompanyResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<CompanyResponse>>> GetAll(
+        CancellationToken cancellationToken)
+    {
+        var companies = await _companyService.GetAllAsync(
+            cancellationToken);
+        return Ok(companies);
+    }
 }

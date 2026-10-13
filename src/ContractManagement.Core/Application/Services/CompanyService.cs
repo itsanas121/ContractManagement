@@ -81,5 +81,25 @@ namespace ContractManagement.Core.Application.Services
                 CreatedAt = company.CreatedDate
             };
         }
+        
+        public async Task<List<CompanyResponse>> GetAllAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Companies
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => new CompanyResponse
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    RegistrationNumber = c.RegistrationNumber,
+                    Email = c.Email,
+                    Phone = c.Phone,
+                    Address = c.Address,
+                    Status = c.Status,
+                    CreatedAt = c.CreatedDate
+                })
+                .ToListAsync(cancellationToken);
+        }
     }
 }
