@@ -2,6 +2,7 @@ using ContractManagement.Core.Domain.Enums;
 using ContractManagement.Core.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace ContractManagement.Api.Controllers;
 
@@ -60,4 +61,4 @@ public class ContractLifecycleController : ControllerBase
     }
 }
 
-public record RejectContractRequest(string Reason);
+public record RejectContractRequest([Required, MaxLength(1000)] string Reason);

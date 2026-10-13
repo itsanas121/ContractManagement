@@ -18,7 +18,7 @@ public static class TestData
     public static Party NewParty() =>
         new IndividualParty("Ahmed Ali", "1012345678", "ahmed@test.com", "0500000000");
 
-        // A contract that is already UnderReview (has a party and a document)
+    // A contract that is already UnderReview (has a party and a document)
     public static Contract NewUnderReviewContract()
     {
         var contract = NewDraftContract();
@@ -38,8 +38,11 @@ public static class TestData
     }
 
     // Test-only: set a private Id, because there is no database in unit tests
-    private static void SetId(object entity, int id)
+    public static void SetId(object entity, int id) => SetProperty(entity, "Id", id);
+
+    // Test-only: set any private property (there is no database in unit tests)
+    public static void SetProperty(object entity, string propertyName, object value)
     {
-        entity.GetType().GetProperty("Id")!.SetValue(entity, id);
+        entity.GetType().GetProperty(propertyName)!.SetValue(entity, value);
     }
 }
