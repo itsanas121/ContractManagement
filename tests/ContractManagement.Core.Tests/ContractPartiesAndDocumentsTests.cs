@@ -21,20 +21,20 @@ public class ContractPartiesAndDocumentsTests
 
 
     [Fact]
-public void AddParty_allows_different_parties_on_the_same_contract()
-{
-    var contract = TestData.NewDraftContract();
-    var individual = TestData.NewParty();
-    var organization = new OrganizationParty(
-        "ABC Company", "7001234567", "Sara Ali", "info@abc.com", "0112345678");
-    SetPartyId(individual, 1);
-    SetPartyId(organization, 2);
+    public void AddParty_allows_different_parties_on_the_same_contract()
+    {
+        var contract = TestData.NewDraftContract();
+        var individual = TestData.NewParty();
+        var organization = new OrganizationParty(
+            "ABC Company", "7001234567", "Sara Ali", "info@abc.com", "0112345678");
+        SetPartyId(individual, 1);
+        SetPartyId(organization, 2);
 
-    contract.AddParty(individual, PartyRole.Customer);
-    contract.AddParty(organization, PartyRole.Supplier);
+        contract.AddParty(individual, PartyRole.Customer);
+        contract.AddParty(organization, PartyRole.Supplier);
 
-    Assert.Equal(2, contract.Parties.Count);
-}
+        Assert.Equal(2, contract.Parties.Count);
+    }
 
     [Fact]
     public void AddParty_same_party_twice_is_rejected()
