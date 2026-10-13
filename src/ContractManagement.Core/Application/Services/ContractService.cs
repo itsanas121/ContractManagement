@@ -72,4 +72,65 @@ public class ContractService : IContractService
             contract.ContractValue, contract.StartDate, contract.EndDate,
             contract.ContractType, contract.Status, contract.CompanyId, contract.OwnerId);
     }
+    public async Task AddPartyAsync(
+        int contractId,
+        AddContractPartyRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var contract = await LoadContractAsync(contractId, cancellationToken);
+        EnsureOwner(contract);
+
+        var party = await _dbContext.Parties
+            .FirstOrDefaultAsync(p => p.Id == request.PartyId, cancellationToken)
+            ?? throw new NotFoundException("Party", request.PartyId!.Value);
+
+        contract.AddParty(party, request.PartyRole!.Value);
+
+        _auditService.Log(
+            AuditEntityType.Contract,
+            contract.Id,
+            AuditAction.PartyAdded,
+            _currentUser.UserId,
+            newValue: new { PartyId = party.Id, request.PartyRole });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AddDocumentAsync(
+        int contractId,
+        AddContractDocumentRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var contract = await LoadContractAsync(contractId, cancellationToken);
+        EnsureOwner(contract);
+
+        var fileName = request.FileName.Trim();
+
+        contract.AddDocument(fileName, request.DocumentType!.Value, request.FilePath, contract.OwnerId);
+
+        _auditService.Log(
+            AuditEntityType.Contract,
+            contract.Id,
+            AuditAction.DocumentAdded,
+            _currentUser.UserId,
+            newValue: new { FileName = fileName, request.DocumentType });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<Contract> LoadContractAsync(int contractId, CancellationToken cancellationToken)
+    {
+        var contract = await _dbContext.Contracts
+            .Include(c => c.Parties)
+            .Include(c => c.Documents)
+            .FirstOrDefaultAsync(c => c.Id == contractId, cancellationToken);
+
+        return contract ?? throw new NotFoundException("Contract", contractId);
+    }
+
+    private void EnsureOwner(Contract contract)
+    {
+        if (contract.OwnerId != _currentUser.UserId)
+            throw new ForbiddenException("Only the contract owner can change its parties and documents.");
+    }
 }
