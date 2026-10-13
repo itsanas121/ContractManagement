@@ -1,5 +1,4 @@
-﻿using ContractManagement.Core.Application.DTOs.Companies;
-using ContractManagement.Core.Application.DTOs.Users;
+﻿using ContractManagement.Core.Application.DTOs.Users;
 using ContractManagement.Core.Application.Services;
 using ContractManagement.Core.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
