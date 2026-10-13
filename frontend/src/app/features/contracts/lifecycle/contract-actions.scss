@@ -1,0 +1,31 @@
+.contract-actions {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reason-box mat-form-field {
+  width: 100%;
+}
+
+.success {
+  color: #1b5e20;
+}
+
+.errors {
+  color: #b3261e;
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
