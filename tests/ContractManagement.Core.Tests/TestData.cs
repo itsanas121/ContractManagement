@@ -17,4 +17,32 @@ public static class TestData
 
     public static Party NewParty() =>
         new IndividualParty("Ahmed Ali", "1012345678", "ahmed@test.com", "0500000000");
+
+    // A contract that is already UnderReview (has a party and a document)
+    public static Contract NewUnderReviewContract()
+    {
+        var contract = NewDraftContract();
+        contract.AddParty(NewParty(), PartyRole.Customer);
+        contract.AddDocument("agreement.pdf", DocumentType.MainContract, null, 1);
+        contract.SubmitForReview();
+        return contract;
+    }
+
+    // A reviewer in the same company as the contract, with Id 2 (not the owner)
+    public static User NewReviewer(Contract contract)
+    {
+        var reviewer = new User("Omar", "Saleh", "omar@test.com", "E003", "hash",
+            UserRole.Reviewer, contract.Company);
+        SetId(reviewer, 2);
+        return reviewer;
+    }
+
+    // Test-only: set a private Id, because there is no database in unit tests
+    public static void SetId(object entity, int id) => SetProperty(entity, "Id", id);
+
+    // Test-only: set any private property (there is no database in unit tests)
+    public static void SetProperty(object entity, string propertyName, object value)
+    {
+        entity.GetType().GetProperty(propertyName)!.SetValue(entity, value);
+    }
 }

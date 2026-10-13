@@ -36,6 +36,37 @@ public class ContractLifecycleService : IContractLifecycleService
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task ApproveAsync(int contractId, CancellationToken cancellationToken = default)
+    {
+        var contract = await LoadContractAsync(contractId, cancellationToken);
+        var reviewer = await LoadCurrentUserAsync(cancellationToken);
+
+        var oldStatus = contract.Status;
+        contract.Approve(reviewer);
+
+        _audit.Log(AuditEntityType.Contract, contract.Id, AuditAction.Approved, reviewer.Id,
+            oldValue: new { Status = oldStatus },
+            newValue: new { Status = contract.Status });
+
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task RejectAsync(int contractId, string reason, CancellationToken cancellationToken = default)
+    {
+        reason = reason.Trim();
+        var contract = await LoadContractAsync(contractId, cancellationToken);
+        var reviewer = await LoadCurrentUserAsync(cancellationToken);
+
+        var oldStatus = contract.Status;
+        contract.Reject(reviewer, reason);
+
+        _audit.Log(AuditEntityType.Contract, contract.Id, AuditAction.Rejected, reviewer.Id,
+            oldValue: new { Status = oldStatus },
+            newValue: new { Status = contract.Status, Reason = reason });
+
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
     private async Task<Contract> LoadContractAsync(int contractId, CancellationToken cancellationToken)
     {
         var contract = await _db.Contracts
@@ -45,5 +76,14 @@ public class ContractLifecycleService : IContractLifecycleService
             .FirstOrDefaultAsync(c => c.Id == contractId, cancellationToken);
 
         return contract ?? throw new NotFoundException("Contract", contractId);
+    }
+
+    private async Task<User> LoadCurrentUserAsync(CancellationToken cancellationToken)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new ForbiddenException("No logged-in user.");
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+        return user ?? throw new NotFoundException("User", userId);
     }
 }
