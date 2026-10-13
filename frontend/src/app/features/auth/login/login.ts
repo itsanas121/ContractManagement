@@ -60,7 +60,7 @@ export class Login {
         error: (error: HttpErrorResponse) => {
           this.errorMessage = error.status === 401
             ? "Incorrect email or password"
-            : "Login faild. Please try again.";
+            : "Login failed. Please try again.";
         }
 
       });

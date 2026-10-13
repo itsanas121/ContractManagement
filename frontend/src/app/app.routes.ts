@@ -9,7 +9,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    "title": 'Sing in | Contract Management',
+    "title": 'Sign in | Contract Management',
     loadComponent: () =>
       import('./features/auth/login/login')
         .then((m) => m.Login
