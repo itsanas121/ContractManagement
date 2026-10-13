@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +25,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class Companies implements OnInit{
   private readonly fb = inject(FormBuilder);
   private readonly companyService = inject(CompanyService);
+
+  // data change fix
+  private readonly cdr = inject(ChangeDetectorRef);
 
   companies: CompanyResponse[] = []
 
@@ -53,7 +56,10 @@ export class Companies implements OnInit{
     this.loadingCompanies = true;
     this.loadError = '';
     this.companyService.getAll()
-      .pipe(finalize(() => this.loadingCompanies = false))
+      .pipe(finalize(() => {
+        this.loadingCompanies = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
         next: (companies) => {
           this.companies = companies
@@ -88,7 +94,10 @@ export class Companies implements OnInit{
     this.successMessage = '';
 
     this.companyService.create(request)
-      .pipe(finalize(() => this.saving = false))
+      .pipe(finalize(() => {
+        this.saving = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
         next: (createdCompany) => {
           this.successMessage =
