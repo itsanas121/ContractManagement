@@ -59,6 +59,33 @@ public class ContractLifecycleController : ControllerBase
         await _lifecycle.RejectAsync(id, request.Reason, cancellationToken);
         return NoContent();
     }
-}
 
+        [HttpPost("{id:int}/activate")]
+    [Authorize(Roles = nameof(UserRole.ContractManager))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Activate(int id, CancellationToken cancellationToken)
+    {
+        await _lifecycle.ActivateAsync(id, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/terminate")]
+    [Authorize(Roles = nameof(UserRole.ContractManager))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Terminate(int id, TerminateContractRequest request, CancellationToken cancellationToken)
+    {
+        await _lifecycle.TerminateAsync(id, request.Reason, cancellationToken);
+        return NoContent();
+    }
+}
 public record RejectContractRequest([Required, MaxLength(1000)] string Reason);
+public record TerminateContractRequest([Required, MaxLength(1000)] string Reason);

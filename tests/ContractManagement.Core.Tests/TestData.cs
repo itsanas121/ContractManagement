@@ -28,6 +28,22 @@ public static class TestData
         return contract;
     }
 
+    // An Approved contract (submitted, then approved by a reviewer)
+    public static Contract NewApprovedContract()
+    {
+        var contract = NewUnderReviewContract();
+        contract.Approve(NewReviewer(contract));
+        return contract;
+    }
+
+    // An Active contract (activated on its start date: 1 Nov 2026)
+    public static Contract NewActiveContract()
+    {
+        var contract = NewApprovedContract();
+        contract.Activate(new DateOnly(2026, 11, 1));
+        return contract;
+    }
+
     // A reviewer in the same company as the contract, with Id 2 (not the owner)
     public static User NewReviewer(Contract contract)
     {
