@@ -156,6 +156,7 @@ public static class DevelopmentDataSeeder
                             "Seed user {Email} is inactive. Preserving current status.",
                             item.Email);
                 }
+                continue;
             }
 
             if (!company.IsActive)
