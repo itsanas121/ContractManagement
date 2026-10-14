@@ -128,7 +128,7 @@ public class ContractService : IContractService
             where a.EntityType == AuditEntityType.Contract && a.EntityId == contractId
             join u in _dbContext.Users on a.PerformedById equals u.Id into users
             from u in users.DefaultIfEmpty()
-            orderby a.PerformedAt
+            orderby a.PerformedAt, a.Id
             select new ContractAuditEntryResponse(
                 a.Action.ToString(),
                 a.OldValue,
