@@ -141,14 +141,21 @@ public static class DevelopmentDataSeeder
             {
                 if (existingUser.Role != role ||
                     existingUser.CompanyId != company.Id ||
-                    existingUser.EmployeeNumber != item.EmployeeNumber ||
-                    !existingUser.IsActive)
+                    existingUser.EmployeeNumber != item.EmployeeNumber)
                 {
                     throw new InvalidOperationException(
                         $"Existing user {item.Email} " +
                         "does not match the seed configuration.");
                 }
-                continue;
+                if (!existingUser.IsActive)
+                {
+                    scope.ServiceProvider
+                        .GetRequiredService<ILoggerFactory>()
+                        .CreateLogger(nameof(DevelopmentDataSeeder))
+                        .LogWarning(
+                            "Seed user {Email} is inactive. Preserving current status.",
+                            item.Email);
+                }
             }
 
             //temp object used only for hasing the password
