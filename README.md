@@ -236,6 +236,12 @@ All endpoints except login require `Authorization: Bearer <token>`.
 | POST | `/api/auth/login` | Anyone | Log in and receive a JWT |
 | GET | `/api/companies` | Administrator | List companies |
 | POST | `/api/companies` | Administrator | Register a company |
+| POST | `/api/companies/{id}/activate` | Administrator | Activate a company |
+| POST | `/api/companies/{id}/deactivate` | Administrator | Deactivate a company |
+| GET | `/api/users` | Administrator | List users |
+| POST | `/api/users` | Administrator | Register a user (role, company, optional profile) |
+| POST | `/api/users/{id}/activate` | Administrator | Activate a user |
+| POST | `/api/users/{id}/deactivate` | Administrator | Deactivate a user (their token stops working immediately) |
 | GET | `/api/parties` | Administrator, ContractManager | List parties |
 | POST | `/api/parties/individual` | Administrator, ContractManager | Register an individual party |
 | POST | `/api/parties/organization` | Administrator, ContractManager | Register an organization party |
@@ -298,10 +304,10 @@ We use **GitFlow**:
 - [x] Error handling and Swagger
 - [x] Audit service
 - [x] JWT login and role-based authorization
-- [x] Angular app with login
-- [x] Companies, parties, create contract, parties/documents, lifecycle actions (API)
-- [ ] Users management (API + UI)
-- [ ] Remaining screens (companies, contracts, parties)
+- [x] Companies, users, parties, create contract, parties/documents, lifecycle actions (API)
+- [x] Screens: login, companies, parties, create contract, lifecycle actions, role-based route guards
+- [ ] Users screen (in review)
+- [ ] Contract details page and contract list
 - [ ] Contract search, expiration job, audit history, dashboard
 - [ ] Release v1.0
 
