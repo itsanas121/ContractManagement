@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IContractLifecycleService, ContractLifecycleService>();
 
         services.AddScoped<IPartyService, PartyService>();
+        services.AddScoped<IContractService, ContractService>();
         
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<ICompanyService, CompanyService>();

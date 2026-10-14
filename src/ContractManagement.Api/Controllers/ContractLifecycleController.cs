@@ -2,6 +2,7 @@ using ContractManagement.Core.Domain.Enums;
 using ContractManagement.Core.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace ContractManagement.Api.Controllers;
 
@@ -18,7 +19,7 @@ public class ContractLifecycleController : ControllerBase
     }
 
     [HttpPost("{id:int}/submit")]
-    [Authorize(Roles = nameof(UserRole.ContractManager))]  
+    [Authorize(Roles = nameof(UserRole.ContractManager))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -30,4 +31,61 @@ public class ContractLifecycleController : ControllerBase
         await _lifecycle.SubmitAsync(id, cancellationToken);
         return NoContent();
     }
+
+    [HttpPost("{id:int}/approve")]
+    [Authorize(Roles = nameof(UserRole.Reviewer))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Approve(int id, CancellationToken cancellationToken)
+    {
+        await _lifecycle.ApproveAsync(id, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/reject")]
+    [Authorize(Roles = nameof(UserRole.Reviewer))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Reject(int id, RejectContractRequest request, CancellationToken cancellationToken)
+    {
+        await _lifecycle.RejectAsync(id, request.Reason, cancellationToken);
+        return NoContent();
+    }
+
+        [HttpPost("{id:int}/activate")]
+    [Authorize(Roles = nameof(UserRole.ContractManager))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Activate(int id, CancellationToken cancellationToken)
+    {
+        await _lifecycle.ActivateAsync(id, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/terminate")]
+    [Authorize(Roles = nameof(UserRole.ContractManager))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Terminate(int id, TerminateContractRequest request, CancellationToken cancellationToken)
+    {
+        await _lifecycle.TerminateAsync(id, request.Reason, cancellationToken);
+        return NoContent();
+    }
 }
+public record RejectContractRequest([Required, MaxLength(1000)] string Reason);
+public record TerminateContractRequest([Required, MaxLength(1000)] string Reason);
