@@ -206,4 +206,125 @@
     </form>
   </section>
 
+
+  <!-- Registered Users -->
+  <section class="card">
+
+    <div class="section-header">
+      <div>
+        <h2>Registered Users</h2>
+        <p class="section-description">
+          View and manage users registered in the system.
+        </p>
+      </div>
+
+      <button mat-stroked-button
+              type="button"
+              (click)="loadUsers()"
+              [disabled]="loadingUsers">
+        Refresh
+      </button>
+    </div>
+
+    <!-- Status Messages -->
+    @if (statusError) {
+    <p class="error-message" role="alert">
+      {{ statusError }}
+    </p>
+    }
+
+    @if (statusSuccess) {
+    <p class="success-message" role="status">
+      {{ statusSuccess }}
+    </p>
+    }
+
+    <!-- Loading / Error / Empty States -->
+    @if (loadingUsers) {
+    <p>Loading users...</p>
+    }
+
+    @if (loadError) {
+    <p class="error-message" role="alert">
+      {{ loadError }}
+    </p>
+    }
+
+    @if (!loadingUsers && !loadError && users.length === 0) {
+    <p class="empty-state">
+      No users registered yet.
+    </p>
+    }
+
+    <!-- User Table -->
+    @if (!loadingUsers && !loadError && users.length > 0) {
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Employee Number</th>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Job Title</th>
+            <th>Department</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (user of users; track user.id) {
+          <tr>
+            <td>{{ user.firstName }} {{ user.lastName }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.employeeNumber }}</td>
+            <td>{{ getCompanyName(user.companyId) }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ user.profile?.jobTitle || '—' }}</td>
+            <td>{{ user.profile?.department || '—' }}</td>
+            <td>{{ user.profile?.phoneNumber || '—' }}</td>
+
+            <td>
+              <span class="status"
+                    [class.active]="user.status === 'Active'">
+                {{ user.status }}
+              </span>
+            </td>
+
+            <td>{{ user.createdAt | date:'mediumDate' }}</td>
+
+            <td>
+              <button mat-stroked-button
+                      type="button"
+                      (click)="toggleUserStatus(user)"
+                      [disabled]="updatingUserId !== null || loadingUsers">
+
+                @if (updatingUserId === user.id) {
+                Updating...
+                } @else {
+                {{
+ user.status === 'Active'
+                      ? 'Deactivate'
+                      : 'Activate'
+                }}
+                }
+
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    }
+
+  </section>
+
+
 </main>
