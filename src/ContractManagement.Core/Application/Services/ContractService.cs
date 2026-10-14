@@ -104,9 +104,23 @@ public class ContractService : IContractService
     public async Task<IReadOnlyList<ContractAuditEntryResponse>> GetAuditHistoryAsync(
         int contractId, CancellationToken cancellationToken = default)
     {
-        var exists = await _dbContext.Contracts.AnyAsync(c => c.Id == contractId, cancellationToken);
-        if (!exists)
-            throw new NotFoundException("Contract", contractId);
+        var userId = _currentUser.UserId
+            ?? throw new ForbiddenException("No logged-in user.");
+
+        var userCompanyId = await _dbContext.Users
+            .Where(u => u.Id == userId)
+            .Select(u => (int?)u.CompanyId)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("User", userId);
+
+        var contractCompanyId = await _dbContext.Contracts
+            .Where(c => c.Id == contractId)
+            .Select(c => (int?)c.CompanyId)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("Contract", contractId);
+
+        if (contractCompanyId != userCompanyId)
+            throw new ForbiddenException("You can only view the history of your own company's contracts.");
 
         // LEFT JOIN to Users: the log stays even if the user is removed (no FK on purpose)
         return await (
