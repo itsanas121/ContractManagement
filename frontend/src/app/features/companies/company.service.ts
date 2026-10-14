@@ -25,4 +25,18 @@ export class CompanyService {
       request
     );
   }
+
+  activate(companyId: number): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/${companyId}/activate`,
+      null
+    );
+  }
+
+  deactivate(companyId: number): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/${companyId}/deactivate`,
+      null
+    );
+  }
 }
