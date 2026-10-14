@@ -29,7 +29,7 @@ import {
 } from '../contract.models';
 import { ContractService } from '../contract.service';
 import { apiErrorMessages } from '../lifecycle/api-errors';
-import { CurrentUserService } from '../lifecycle/current-user';
+import { CurrentUserService } from '../../../core/auth/current-user';
 
 const positiveValue: ValidatorFn = (
   control: AbstractControl,
