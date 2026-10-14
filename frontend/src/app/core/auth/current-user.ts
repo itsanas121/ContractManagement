@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthService } from '../../../core/auth/auth.service';
+import { AuthService } from './auth.service';
 
 export interface CurrentUser {
   id: number;
@@ -8,7 +8,7 @@ export interface CurrentUser {
 }
 
 // Reads the logged-in user's Id and role from the JWT payload.
-// Used only to decide which buttons to show; the API still enforces the rules.
+// Used by the UI (buttons, route guards); the API still enforces the rules.
 @Injectable({ providedIn: 'root' })
 export class CurrentUserService {
   private readonly auth = inject(AuthService);

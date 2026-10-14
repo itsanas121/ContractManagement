@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +25,8 @@ export class Login {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  private readonly cdr = inject(ChangeDetectorRef);
+
   loading = false;
   errorMessage = '';
 
@@ -43,7 +45,12 @@ export class Login {
     this.errorMessage = '';
 
     this.auth.login(this.loginForm.getRawValue())
-      .pipe(finalize(() => this.loading = false))
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        })
+      )
       .subscribe({
         next: () => {
           const returnUrl =

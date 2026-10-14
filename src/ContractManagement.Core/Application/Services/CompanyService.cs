@@ -101,5 +101,66 @@ namespace ContractManagement.Core.Application.Services
                 })
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task ActivateAsync(
+            int companyId,
+            CancellationToken cancellationToken = default)
+        {
+            var company = await _dbContext.Companies
+                .FirstOrDefaultAsync(
+                    c => c.Id == companyId,
+                    cancellationToken);
+
+            if (company is null)
+                throw new NotFoundException("Company", companyId);
+
+            if (company.IsActive)
+                throw new DomainException("Company is already active.");
+
+            var oldStatus = company.Status;
+
+            company.Activate();
+
+            _auditService.Log(
+                AuditEntityType.Company,
+                company.Id,
+                AuditAction.Activated,
+                _currentUser.UserId,
+                oldValue: new { Status = oldStatus },
+                newValue: new { Status = company.Status });
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+
+        public async Task DeactivateAsync(
+            int companyId,
+            CancellationToken cancellationToken = default)
+        {
+            var company = await _dbContext.Companies
+                .FirstOrDefaultAsync(
+                    c => c.Id == companyId,
+                    cancellationToken);
+
+            if (company is null)
+                throw new NotFoundException("Company", companyId);
+
+            if (!company.IsActive)
+                throw new DomainException("Company is already inactive.");
+
+            var oldStatus = company.Status;
+
+            company.Deactivate();
+
+            _auditService.Log(
+                AuditEntityType.Company,
+                company.Id,
+                AuditAction.Deactivated,
+                _currentUser.UserId,
+                oldValue: new { Status = oldStatus },
+                newValue: new { Status = company.Status });
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
     }
 }

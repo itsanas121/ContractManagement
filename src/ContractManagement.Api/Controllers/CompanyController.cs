@@ -40,4 +40,28 @@ public class CompanyController: ControllerBase
             cancellationToken);
         return Ok(companies);
     }
+
+    [HttpPost("{id:int}/activate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Activate(
+    int id,
+    CancellationToken cancellationToken)
+    {
+        await _companyService.ActivateAsync(
+            id, cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/deactivate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Deactivate(
+    int id,
+    CancellationToken cancellationToken)
+    {
+        await _companyService.DeactivateAsync(
+            id, cancellationToken);
+
+        return NoContent();
+    }
 }

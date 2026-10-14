@@ -5,7 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { Observable } from 'rxjs';
 import { ContractLifecycleService } from './contract-lifecycle.service';
-import { CurrentUserService } from './current-user';
+import { CurrentUserService } from '../../../core/auth/current-user';
 import { apiErrorMessages } from './api-errors';
 
 type ReasonAction = 'reject' | 'terminate';
