@@ -106,17 +106,85 @@ public class ContractService : IContractService
 
         var fileName = request.FileName.Trim();
 
-        contract.AddDocument(fileName, request.DocumentType!.Value, request.FilePath, contract.OwnerId);
+        contract.AddDocument(
+            fileName,
+            request.DocumentType!.Value,
+            request.FilePath,
+            contract.OwnerId);
 
         _auditService.Log(
             AuditEntityType.Contract,
             contract.Id,
             AuditAction.DocumentAdded,
             _currentUser.UserId,
-            newValue: new { FileName = fileName, request.DocumentType });
+            newValue: new
+            {
+                FileName = fileName,
+                request.DocumentType
+            });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<ContractDetailsResponse> GetByIdAsync(
+        int contractId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new ForbiddenException("No logged-in user.");
+
+        var userCompanyId = await _dbContext.Users
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => (int?)u.CompanyId)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("User", userId);
+
+        var contract = await _dbContext.Contracts
+            .AsNoTracking()
+            .Where(c => c.Id == contractId)
+            .Select(c => new ContractDetailsResponse(
+                c.Id,
+                c.ContractNumber,
+                c.Title,
+                c.Description,
+                c.ContractValue,
+                c.StartDate,
+                c.EndDate,
+                c.ContractType,
+                c.Status,
+                c.CompanyId,
+                c.Company.Name,
+                c.OwnerId,
+                c.Owner.FirstName + " " + c.Owner.LastName,
+                c.Parties
+                    .OrderBy(p => p.AddedDate)
+                    .Select(p => new ContractPartyResponse(
+                        p.PartyId,
+                        p.Party.Name,
+                        p.PartyRole,
+                        p.AddedDate))
+                    .ToList(),
+                c.Documents
+                    .OrderBy(d => d.UploadedDate)
+                    .Select(d => new ContractDocumentResponse(
+                        d.Id,
+                        d.FileName,
+                        d.DocumentType,
+                        d.FilePath,
+                        d.UploadedById,
+                        d.UploadedDate))
+                    .ToList()))
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("Contract", contractId);
+
+        if (contract.CompanyId != userCompanyId)
+            throw new ForbiddenException(
+                "You can only view contracts of your own company.");
+
+        return contract;
+    }
+
 
     private async Task<Contract> LoadContractAsync(int contractId, CancellationToken cancellationToken)
     {
