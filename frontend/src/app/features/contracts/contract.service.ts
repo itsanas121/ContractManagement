@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ContractSummary } from './contract.models';
 import { environment } from '../../../environments/environment';
 import {
   AddContractDocumentRequest,
   AddContractPartyRequest,
   ContractResponse,
+  ContractSummary,
   CreateContractRequest,
 } from './contract.models';
 
