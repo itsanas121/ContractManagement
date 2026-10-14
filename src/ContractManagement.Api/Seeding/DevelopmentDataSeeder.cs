@@ -16,6 +16,10 @@ public static class DevelopmentDataSeeder
 
         using var scope = serviceProvider.CreateScope();
 
+        var logger = scope.ServiceProvider
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger(nameof(DevelopmentDataSeeder));
+
         var environment = scope.ServiceProvider
             .GetRequiredService<IHostEnvironment>();
 
@@ -92,8 +96,11 @@ public static class DevelopmentDataSeeder
             }
 
             if (!company.IsActive)
-                throw new InvalidOperationException(
-                    $"Seed company {item.RegistrationNumber} is inactive.");
+            {
+                logger.LogWarning(
+                    "Seed company {RegistrationNumber} is inactive. Preserving its current status.",
+                    item.RegistrationNumber);
+            }
 
             companies.Add(item.RegistrationNumber, company);
         }
