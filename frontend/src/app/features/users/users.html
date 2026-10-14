@@ -1,1 +1,209 @@
-<p>users works!</p>
+
+<main class="user-page">
+
+  <header class="page-header">
+    <div>
+      <h1>User Management</h1>
+      <p>Register and manage users in the Contract Management System.</p>
+    </div>
+
+    <a mat-stroked-button routerLink="/home">
+      Back to Home
+    </a>
+  </header>
+
+  <!-- Register User -->
+  <section class="card">
+    <h2>Register User</h2>
+
+    <p class="section-description">
+      Enter the user's information and assign a company and role.
+    </p>
+
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-grid">
+
+        <!-- First Name -->
+        <mat-form-field appearance="outline">
+          <mat-label>First Name</mat-label>
+
+          <input matInput formControlName="firstName" maxlength="100" />
+
+          @if (userForm.controls.firstName.hasError('required')
+          || userForm.controls.firstName.hasError('pattern')) {
+          <mat-error>First name is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Last Name -->
+        <mat-form-field appearance="outline">
+          <mat-label>Last Name</mat-label>
+
+          <input matInput formControlName="lastName" maxlength="100" />
+
+          @if (userForm.controls.lastName.hasError('required')
+          || userForm.controls.lastName.hasError('pattern')) {
+          <mat-error>Last name is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+
+          <input matInput
+                 type="email"
+                 formControlName="email"
+                 maxlength="256"
+                 autocomplete="off" />
+
+          @if (userForm.controls.email.hasError('required')) {
+          <mat-error>Email is required.</mat-error>
+          } @else if (userForm.controls.email.hasError('email')) {
+          <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Employee Number -->
+        <mat-form-field appearance="outline">
+          <mat-label>Employee Number</mat-label>
+
+          <input matInput
+                 formControlName="employeeNumber"
+                 maxlength="50" />
+
+          @if (userForm.controls.employeeNumber.hasError('required')
+          || userForm.controls.employeeNumber.hasError('pattern')) {
+          <mat-error>Employee number is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Password -->
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+
+          <input matInput
+                 type="password"
+                 formControlName="password"
+                 autocomplete="new-password" />
+
+          @if (userForm.controls.password.hasError('required')) {
+          <mat-error>Password is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Role -->
+        <mat-form-field appearance="outline">
+          <mat-label>Role</mat-label>
+
+          <mat-select formControlName="role">
+            @for (role of roles; track role) {
+            <mat-option [value]="role">
+              {{ role }}
+            </mat-option>
+            }
+          </mat-select>
+
+          @if (userForm.controls.role.hasError('required')) {
+          <mat-error>Please select a role.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Company -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company</mat-label>
+
+          <mat-select formControlName="companyId">
+            @for (company of activeCompanies; track company.id) {
+            <mat-option [value]="company.id">
+              {{ company.name }}
+            </mat-option>
+            }
+          </mat-select>
+
+          @if (userForm.controls.companyId.hasError('min')) {
+          <mat-error>Please select a company.</mat-error>
+          }
+        </mat-form-field>
+
+      </div>
+
+      <!-- Company Loading / Errors -->
+      @if (loadingCompanies) {
+      <p class="section-description">Loading companies...</p>
+      }
+
+      @if (companyLoadError) {
+      <p class="error-message" role="alert">
+        {{ companyLoadError }}
+      </p>
+
+      <button mat-stroked-button
+              type="button"
+              (click)="loadCompanies()"
+              [disabled]="loadingCompanies">
+        Retry Loading Companies
+      </button>
+      }
+
+      @if (!loadingCompanies
+      && !companyLoadError
+      && activeCompanies.length === 0) {
+      <p class="error-message" role="alert">
+        No active companies available. Register or activate a company first.
+      </p>
+      }
+
+      <!-- Optional Profile -->
+      <h3>Profile Information (Optional)</h3>
+
+      <div class="form-grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Job Title</mat-label>
+          <input matInput formControlName="jobTitle" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Department</mat-label>
+          <input matInput formControlName="department" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Phone Number</mat-label>
+          <input matInput
+                 type="tel"
+                 formControlName="phoneNumber" />
+        </mat-form-field>
+
+      </div>
+
+      <!-- API Messages -->
+      @if (submitError) {
+      <p class="error-message" role="alert">
+        {{ submitError }}
+      </p>
+      }
+
+      @if (successMessage) {
+      <p class="success-message" role="status">
+        {{ successMessage }}
+      </p>
+      }
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <button mat-flat-button
+                type="submit"
+                [disabled]="saving || loadingCompanies || activeCompanies.length === 0">
+
+          {{ saving ? 'Registering...' : 'Register User' }}
+
+        </button>
+      </div>
+
+    </form>
+  </section>
+
+</main>
