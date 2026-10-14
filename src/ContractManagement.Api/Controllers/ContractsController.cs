@@ -32,6 +32,14 @@ public class ContractsController : ControllerBase
         return StatusCode(StatusCodes.Status201Created, response);
     }
 
+    [HttpGet("summary")]
+    [ProducesResponseType(typeof(ContractSummaryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ContractSummaryResponse>> GetSummary(CancellationToken cancellationToken)
+    {
+        return Ok(await _contracts.GetSummaryAsync(cancellationToken));
+    }
+
     [HttpPost("{id:int}/parties")]
     [Authorize(Roles = nameof(UserRole.ContractManager))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

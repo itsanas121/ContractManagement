@@ -47,5 +47,10 @@ internal sealed class SqliteRowVersionModelCustomizer : RelationalModelCustomize
         modelBuilder.Entity<Contract>()
             .Property(c => c.RowVersion)
             .HasDefaultValueSql("(randomblob(8))");
+
+        // SQLite can't SUM decimals, so store ContractValue as double in tests only
+        modelBuilder.Entity<Contract>()
+            .Property(c => c.ContractValue)
+            .HasConversion<double>();
     }
 }
