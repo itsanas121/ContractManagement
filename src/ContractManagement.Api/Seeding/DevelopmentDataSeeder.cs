@@ -16,6 +16,10 @@ public static class DevelopmentDataSeeder
 
         using var scope = serviceProvider.CreateScope();
 
+        var logger = scope.ServiceProvider
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger(nameof(DevelopmentDataSeeder));
+
         var environment = scope.ServiceProvider
             .GetRequiredService<IHostEnvironment>();
 
@@ -92,8 +96,11 @@ public static class DevelopmentDataSeeder
             }
 
             if (!company.IsActive)
-                throw new InvalidOperationException(
-                    $"Seed company {item.RegistrationNumber} is inactive.");
+            {
+                logger.LogWarning(
+                    "Seed company {RegistrationNumber} is inactive. Preserving its current status.",
+                    item.RegistrationNumber);
+            }
 
             companies.Add(item.RegistrationNumber, company);
         }
@@ -134,13 +141,34 @@ public static class DevelopmentDataSeeder
             {
                 if (existingUser.Role != role ||
                     existingUser.CompanyId != company.Id ||
-                    existingUser.EmployeeNumber != item.EmployeeNumber ||
-                    !existingUser.IsActive)
+                    existingUser.EmployeeNumber != item.EmployeeNumber)
                 {
                     throw new InvalidOperationException(
                         $"Existing user {item.Email} " +
                         "does not match the seed configuration.");
                 }
+                if (!existingUser.IsActive)
+                {
+                    scope.ServiceProvider
+                        .GetRequiredService<ILoggerFactory>()
+                        .CreateLogger(nameof(DevelopmentDataSeeder))
+                        .LogWarning(
+                            "Seed user {Email} is inactive. Preserving current status.",
+                            item.Email);
+                }
+                continue;
+            }
+
+            if (!company.IsActive)
+            {
+                scope.ServiceProvider
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger(nameof(DevelopmentDataSeeder))
+                    .LogWarning(
+                        "Cannot seed user {Email} because company {RegistrationNumber} is inactive. Skipping user.",
+                        item.Email,
+                        company.RegistrationNumber);
+
                 continue;
             }
 
