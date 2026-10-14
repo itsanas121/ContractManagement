@@ -264,4 +264,85 @@ public class UserServiceTests : IDisposable
         Assert.Equal("IT", users[0].Profile?.Department);
     }
 
+    [Fact]
+    public async Task Duplicate_employee_number_in_same_company_is_rejected()
+    {
+        using var db = _database.CreateContext();
+
+        var company = new Company(
+            "Test Company", "TEST-001", null, null, null);
+
+        db.Companies.Add(company);
+        await db.SaveChangesAsync();
+
+        var service = new UserService(
+            db, _audit, _currentUser,
+            new PasswordHasher<User>());
+
+        var request = new CreateUserRequest
+        {
+            FirstName = "Ahmed",
+            LastName = "Ali",
+            Email = "ahmed@test.com",
+            EmployeeNumber = "EMP-001",
+            Password = "TestPassword123!",
+            Role = UserRole.ContractManager,
+            CompanyId = company.Id
+        };
+
+        await service.CreateAsync(request);
+
+        // Different email, but same employee number and company
+        request.Email = "sara@test.com";
+        request.FirstName = "Sara";
+
+        await Assert.ThrowsAsync<DomainException>(
+            () => service.CreateAsync(request));
+
+        Assert.Equal(1, await db.Users.CountAsync());
+    }
+
+
+    [Fact]
+    public async Task Same_employee_number_in_different_companies_is_allowed()
+    {
+        using var db = _database.CreateContext();
+
+        var companyA = new Company(
+            "Company A", "REG-001", null, null, null);
+
+        var companyB = new Company(
+            "Company B", "REG-002", null, null, null);
+
+        db.Companies.AddRange(companyA, companyB);
+        await db.SaveChangesAsync();
+
+        var service = new UserService(
+            db, _audit, _currentUser,
+            new PasswordHasher<User>());
+
+        var request = new CreateUserRequest
+        {
+            FirstName = "Ahmed",
+            LastName = "Ali",
+            Email = "ahmed@test.com",
+            EmployeeNumber = "EMP-001",
+            Password = "TestPassword123!",
+            Role = UserRole.ContractManager,
+            CompanyId = companyA.Id
+        };
+
+        await service.CreateAsync(request);
+
+        // Same employee number, different company and email
+        request.Email = "sara@test.com";
+        request.FirstName = "Sara";
+        request.CompanyId = companyB.Id;
+
+        await service.CreateAsync(request);
+
+        Assert.Equal(2, await db.Users.CountAsync());
+    }
+
+
 }
