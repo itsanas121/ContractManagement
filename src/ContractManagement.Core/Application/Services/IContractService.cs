@@ -14,4 +14,7 @@ public interface IContractService
 
     Task<ContractSummaryResponse> GetSummaryAsync(
         CancellationToken cancellationToken = default);
+        
+    Task<ContractDetailsResponse> GetByIdAsync(
+    int contractId, CancellationToken cancellationToken = default);
 }

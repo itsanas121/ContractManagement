@@ -4,7 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormGroupDirective } from
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
 import { CompanyService } from './company.service';
 import { CompanyResponse, CreateCompanyRequest } from './company.models';
 import { finalize } from 'rxjs';
@@ -13,7 +12,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   imports: [
     ReactiveFormsModule,
-    RouterLink,
     DatePipe,
     MatButtonModule,
     MatFormFieldModule,
