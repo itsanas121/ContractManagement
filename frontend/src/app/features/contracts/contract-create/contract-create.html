@@ -1,0 +1,158 @@
+<section class="contract-create">
+    <header class="page-header">
+        <h1>Create contract</h1>
+        <a mat-button routerLink="/home">Back to home</a>
+    </header>
+
+    @if (createdContract(); as contract) {
+    <div class="alert success" role="status">
+        Contract "{{ contract.contractNumber }}" created successfully.
+    </div>
+
+    <section class="summary" aria-labelledby="contract-summary-title">
+        <h2 id="contract-summary-title">{{ contract.title }}</h2>
+
+        <dl>
+            <dt>Contract ID</dt>
+            <dd>{{ contract.id }}</dd>
+
+            <dt>Contract number</dt>
+            <dd>{{ contract.contractNumber }}</dd>
+
+            <dt>Status</dt>
+            <dd>{{ contract.status }}</dd>
+
+            <dt>Type</dt>
+            <dd>{{ contract.contractType }}</dd>
+
+            <dt>Value</dt>
+            <dd>{{ contract.contractValue }}</dd>
+
+            <dt>Start date</dt>
+            <dd>{{ contract.startDate }}</dd>
+
+            <dt>End date</dt>
+            <dd>{{ contract.endDate }}</dd>
+
+            <dt>Company ID</dt>
+            <dd>{{ contract.companyId }}</dd>
+
+            <dt>Owner ID</dt>
+            <dd>{{ contract.ownerId }}</dd>
+
+            @if (contract.description) {
+            <dt>Description</dt>
+            <dd class="description">{{ contract.description }}</dd>
+            }
+        </dl>
+    </section>
+
+    <p class="hint">
+        Your contract has been saved. Refreshing this page will clear this
+        summary, but your contract will remain saved.
+    </p>
+
+    <button mat-flat-button type="button" (click)="createAnother()">
+        Create another contract
+    </button>
+    } @else {
+    <p class="hint">
+        New contracts start as Draft.
+    </p>
+
+    @if (sessionError; as message) {
+    <div class="alert error" role="alert">
+        <p>{{ message }}</p>
+        <a mat-button routerLink="/login">Go to sign in</a>
+    </div>
+    } @else {
+    @if (errors().length > 0) {
+    <div class="alert error" role="alert">
+        <ul>
+            @for (message of errors(); track $index) {
+            <li>{{ message }}</li>
+            }
+        </ul>
+    </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline">
+            <mat-label>Contract number</mat-label>
+            <input matInput formControlName="contractNumber" />
+            <mat-error>
+                {{ fieldError(form.controls.contractNumber) }}
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" />
+            <mat-error>{{ fieldError(form.controls.title) }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3"></textarea>
+            <mat-error>
+                {{ fieldError(form.controls.description) }}
+            </mat-error>
+        </mat-form-field>
+
+        <div class="form-row">
+            <mat-form-field appearance="outline">
+                <mat-label>Contract type</mat-label>
+                <mat-select formControlName="contractType">
+                    @for (type of contractTypes; track type) {
+                    <mat-option [value]="type">{{ type }}</mat-option>
+                    }
+                </mat-select>
+                <mat-error>
+                    {{ fieldError(form.controls.contractType) }}
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Contract value</mat-label>
+                <input matInput type="number" step="any" formControlName="contractValue" />
+                <mat-error>
+                    {{ fieldError(form.controls.contractValue) }}
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="form-row">
+            <mat-form-field appearance="outline">
+                <mat-label>Start date</mat-label>
+                <input matInput type="date" formControlName="startDate" />
+                <mat-error>
+                    {{ fieldError(form.controls.startDate) }}
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>End date</mat-label>
+                <input matInput type="date" formControlName="endDate" />
+                <mat-error>
+                    {{ fieldError(form.controls.endDate) }}
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        @if (
+        form.hasError('dateRange') &&
+        (form.controls.startDate.touched ||
+        form.controls.endDate.touched)
+        ) {
+        <p class="date-error" role="alert">
+            End date must be after start date.
+        </p>
+        }
+
+        <button mat-flat-button type="submit" [disabled]="submitting()">
+            {{ submitting() ? 'Creating...' : 'Create contract' }}
+        </button>
+    </form>
+    }
+    }
+</section>

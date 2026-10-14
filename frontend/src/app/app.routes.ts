@@ -29,6 +29,14 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/parties/parties.routes').then((m) => m.PARTIES_ROUTES),
   },
+    {
+    path: 'contracts',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/contracts/contracts.routes').then(
+        (m) => m.CONTRACTS_ROUTES,
+      ),
+  },
   {
     path: '**',
     redirectTo: 'home',
