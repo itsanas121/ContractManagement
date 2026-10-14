@@ -158,6 +158,19 @@ public static class DevelopmentDataSeeder
                 }
             }
 
+            if (!company.IsActive)
+            {
+                scope.ServiceProvider
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger(nameof(DevelopmentDataSeeder))
+                    .LogWarning(
+                        "Cannot seed user {Email} because company {RegistrationNumber} is inactive. Skipping user.",
+                        item.Email,
+                        company.RegistrationNumber);
+
+                continue;
+            }
+
             //temp object used only for hasing the password
             var temporaryUser = new User(
                 item.FirstName,
