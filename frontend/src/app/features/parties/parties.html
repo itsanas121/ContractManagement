@@ -1,0 +1,102 @@
+<section class="parties">
+  <h1>Parties</h1>
+
+  <mat-button-toggle-group [value]="kind()" (change)="setKind($event.value)" aria-label="Party type">
+    <mat-button-toggle value="individual">Individual</mat-button-toggle>
+    <mat-button-toggle value="organization">Organization</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  @if (errors().length > 0) {
+    <ul class="alert error">
+      @for (message of errors(); track message) {
+        <li>{{ message }}</li>
+      }
+    </ul>
+  }
+  @if (success(); as message) {
+    <p class="alert success">{{ message }}</p>
+  }
+
+  @if (kind() === 'individual') {
+    <form [formGroup]="individualForm" (ngSubmit)="submit()" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+        <mat-error>{{ fieldError(individualForm.controls.name) }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>National ID</mat-label>
+        <input matInput formControlName="nationalId" inputmode="numeric" maxlength="10" />
+        <mat-error>{{ fieldError(individualForm.controls.nationalId, 'National ID must be exactly 10 digits.') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+        <mat-error>{{ fieldError(individualForm.controls.email) }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" />
+        <mat-error>{{ fieldError(individualForm.controls.phone) }}</mat-error>
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Saving...' : 'Register' }}
+      </button>
+    </form>
+  } @else {
+    <form [formGroup]="organizationForm" (ngSubmit)="submit()" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>Organization name</mat-label>
+        <input matInput formControlName="organizationName" />
+        <mat-error>{{ fieldError(organizationForm.controls.organizationName) }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Registration number</mat-label>
+        <input matInput formControlName="registrationNumber" inputmode="numeric" maxlength="10" />
+        <mat-error>{{ fieldError(organizationForm.controls.registrationNumber, 'Registration number must be exactly 10 digits.') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Contact person</mat-label>
+        <input matInput formControlName="contactPerson" />
+        <mat-error>{{ fieldError(organizationForm.controls.contactPerson) }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+        <mat-error>{{ fieldError(organizationForm.controls.email) }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" />
+        <mat-error>{{ fieldError(organizationForm.controls.phone) }}</mat-error>
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Saving...' : 'Register' }}
+      </button>
+    </form>
+  }
+
+  <h2>Registered parties</h2>
+  @if (loadingList()) {
+    <p>Loading...</p>
+  } @else if (parties().length === 0) {
+    <p>No parties registered yet.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Type</th><th>ID / Reg. no.</th><th>Email</th><th>Phone</th></tr>
+      </thead>
+      <tbody>
+        @for (party of parties(); track party.id) {
+          <tr>
+            <td>{{ party.name }}</td>
+            <td>{{ party.partyType }}</td>
+            <td>{{ party.nationalId ?? party.registrationNumber }}</td>
+            <td>{{ party.email }}</td>
+            <td>{{ party.phone }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

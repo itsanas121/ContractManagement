@@ -23,6 +23,12 @@ export const routes: Routes = [
         (m) => m.HOME_ROUTES,
       ),
   },
+    {
+    path: 'parties',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/parties/parties.routes').then((m) => m.PARTIES_ROUTES),
+  },
   {
     path: '**',
     redirectTo: 'home',
