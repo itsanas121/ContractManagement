@@ -42,3 +42,37 @@ export interface ContractResponse {
   companyId: number;
   ownerId: number;
 }
+
+export const PARTY_ROLES = [
+  'Customer',
+  'Supplier',
+  'Partner',
+  'Consultant',
+] as const;
+
+export type PartyRole = (typeof PARTY_ROLES)[number];
+
+export const DOCUMENT_TYPES = [
+  'MainContract',
+  'CommercialRegistration',
+  'TechnicalProposal',
+  'FinancialProposal',
+  'Other',
+] as const;
+
+export type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+export interface AddContractPartyRequest {
+  partyId: number;
+  partyRole: PartyRole;
+}
+
+export interface AddContractDocumentRequest {
+  fileName: string;
+  documentType: DocumentType;
+  filePath: string | null;
+}
+
+export interface AddedContractParty extends AddContractPartyRequest {
+  name: string;
+}

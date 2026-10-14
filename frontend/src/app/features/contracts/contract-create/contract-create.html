@@ -47,12 +47,9 @@
         </dl>
     </section>
 
-    <p class="hint">
-        Your contract has been saved. Refreshing this page will clear this
-        summary, but your contract will remain saved.
-    </p>
+    <app-contract-attachments [contract]="contract" (busyChange)="attachmentsBusy.set($event)" />
 
-    <button mat-flat-button type="button" (click)="createAnother()">
+    <button mat-flat-button type="button" (click)="createAnother()" [disabled]="attachmentsBusy()">
         Create another contract
     </button>
     } @else {

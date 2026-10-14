@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  AddContractDocumentRequest,
+  AddContractPartyRequest,
   ContractResponse,
   CreateContractRequest,
 } from './contract.models';
@@ -15,5 +17,25 @@ export class ContractService {
 
   create(request: CreateContractRequest): Observable<ContractResponse> {
     return this.http.post<ContractResponse>(this.baseUrl, request);
+  }
+
+  addParty(
+    contractId: number,
+    request: AddContractPartyRequest,
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}/${contractId}/parties`,
+      request,
+    );
+  }
+
+  addDocument(
+    contractId: number,
+    request: AddContractDocumentRequest,
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}/${contractId}/documents`,
+      request,
+    );
   }
 }

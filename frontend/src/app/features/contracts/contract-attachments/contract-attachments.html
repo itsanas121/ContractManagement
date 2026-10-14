@@ -1,0 +1,204 @@
+<section class="contract-attachments" aria-labelledby="attachments-title">
+    <h2 id="attachments-title">Prepare your Draft contract</h2>
+
+
+    @if (accessError; as message) {
+    <div class="alert error" role="alert">
+        {{ message }}
+    </div>
+    } @else {
+    <mat-stepper orientation="vertical" [linear]="true" #stepper>
+        <mat-step label="Add parties" [completed]="hasParty()">
+            @if (loadingParties()) {
+            <p role="status">Loading registered parties...</p>
+            } @else if (loadErrors().length > 0) {
+            <div class="alert error" role="alert">
+                <ul>
+                    @for (message of loadErrors(); track $index) {
+                    <li>{{ message }}</li>
+                    }
+                </ul>
+            </div>
+
+            <button mat-button type="button" (click)="loadParties()" [disabled]="busy()">
+                Retry loading parties
+            </button>
+            } @else if (parties().length === 0) {
+            <p>No registered parties are available.</p>
+            <a mat-button routerLink="/parties">
+                Open parties
+            </a>
+            <button mat-button type="button" (click)="loadParties()">
+                Refresh parties
+            </button>
+            } @else if (availableParties().length === 0) {
+            <p>All parties in the loaded list were added in this session.</p>
+            } @else {
+            <form [formGroup]="partyForm" #partyFormDirective="ngForm" (ngSubmit)="addParty(partyFormDirective)"
+                novalidate>
+                <fieldset [disabled]="busy()">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Registered party</mat-label>
+
+                        <mat-select formControlName="partyId" [disabled]="busy()"
+                            [errorStateMatcher]="fieldErrorMatcher">
+                            @for (party of availableParties(); track party.id) {
+                            <mat-option [value]="party.id">
+                                {{ party.name }} — {{ party.partyType }}
+                            </mat-option>
+                            }
+                        </mat-select>
+
+                        <mat-error>
+                            {{ fieldError(partyForm.controls.partyId) }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Party role</mat-label>
+
+                        <mat-select formControlName="partyRole" [disabled]="busy()"
+                            [errorStateMatcher]="fieldErrorMatcher">
+                            @for (role of partyRoles; track role) {
+                            <mat-option [value]="role">{{ role }}</mat-option>
+                            }
+                        </mat-select>
+
+                        <mat-error>
+                            {{ fieldError(partyForm.controls.partyRole) }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <button mat-flat-button type="submit" [disabled]="busy()">
+                        {{ savingParty() ? 'Adding...' : 'Add party' }}
+                    </button>
+                </fieldset>
+            </form>
+            }
+
+            @if (partyErrors().length > 0) {
+            <div class="alert error" role="alert">
+                <ul>
+                    @for (message of partyErrors(); track $index) {
+                    <li>{{ message }}</li>
+                    }
+                </ul>
+            </div>
+            }
+
+            @if (hasParty()) {
+            <div class="alert success" role="status">
+                Party saved.
+            </div>
+
+            <h3>Parties added in this session</h3>
+
+            <ul class="saved-list">
+                @for (party of addedParties(); track party.partyId) {
+                <li>{{ party.name }} — {{ party.partyRole }}</li>
+                }
+            </ul>
+            }
+
+            <div class="actions">
+                <button mat-button type="button" (click)="stepper.next()" [disabled]="!hasParty() || busy()">
+                    Next: documents
+                </button>
+            </div>
+        </mat-step>
+
+        <mat-step label="Add document metadata" [completed]="hasDocument()">
+            <p class="hint">
+                Metadata only, no file upload.
+            </p>
+
+            <form [formGroup]="documentForm" #documentFormDirective="ngForm"
+                (ngSubmit)="addDocument(documentFormDirective)" novalidate>
+                <fieldset [disabled]="busy()">
+                    <mat-form-field appearance="outline">
+                        <mat-label>File name</mat-label>
+                        <input matInput formControlName="fileName" [errorStateMatcher]="fieldErrorMatcher" />
+
+                        <mat-error>
+                            {{ fieldError(documentForm.controls.fileName) }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Document type</mat-label>
+
+                        <mat-select formControlName="documentType" [disabled]="busy()"
+                            [errorStateMatcher]="fieldErrorMatcher">
+                            @for (type of documentTypes; track type) {
+                            <mat-option [value]="type">{{ type }}</mat-option>
+                            }
+                        </mat-select>
+
+                        <mat-error>
+                            {{ fieldError(documentForm.controls.documentType) }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>File path — optional</mat-label>
+                        <input matInput formControlName="filePath" [errorStateMatcher]="fieldErrorMatcher" />
+
+                        <mat-error>
+                            {{ fieldError(documentForm.controls.filePath) }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <button mat-flat-button type="submit" [disabled]="busy()">
+                        {{ savingDocument() ? 'Saving...' : 'Save document metadata' }}
+                    </button>
+                </fieldset>
+            </form>
+
+            @if (documentErrors().length > 0) {
+            <div class="alert error" role="alert">
+                <ul>
+                    @for (message of documentErrors(); track $index) {
+                    <li>{{ message }}</li>
+                    }
+                </ul>
+            </div>
+            }
+
+            @if (hasDocument()) {
+            <div class="alert success" role="status">
+                Document metadata saved.
+            </div>
+
+            <h3>Documents added in this session</h3>
+
+            <ul class="saved-list">
+                @for (document of addedDocuments(); track $index) {
+                <li>
+                    {{ document.fileName }} — {{ document.documentType }}
+                    @if (document.filePath) {
+                    <span class="file-path">{{ document.filePath }}</span>
+                    }
+                </li>
+                }
+            </ul>
+            }
+
+            <div class="actions">
+                <button mat-button type="button" (click)="stepper.previous()" [disabled]="busy()">
+                    Back to parties
+                </button>
+            </div>
+        </mat-step>
+    </mat-stepper>
+
+    @if (hasParty() && hasDocument()) {
+    <div class="alert success" role="status">
+        Saved. Contract remains Draft.
+    </div>
+    }
+
+    <p class="hint">
+        Session lists only. Saved data remains after refresh.
+    </p>
+    }
+</section>
