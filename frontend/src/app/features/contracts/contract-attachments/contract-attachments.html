@@ -32,7 +32,7 @@
                 Refresh parties
             </button>
             } @else if (availableParties().length === 0) {
-            <p>All parties in the loaded list were added in this session.</p>
+            <p>All registered parties are already added to this contract.</p>
             } @else {
             <form [formGroup]="partyForm" #partyFormDirective="ngForm" (ngSubmit)="addParty(partyFormDirective)"
                 novalidate>
@@ -86,7 +86,7 @@
             </div>
             }
 
-            @if (hasParty()) {
+            @if (addedParties().length > 0) {
             <div class="alert success" role="status">
                 Party saved.
             </div>
@@ -164,7 +164,7 @@
             </div>
             }
 
-            @if (hasDocument()) {
+            @if (addedDocuments().length > 0) {
             <div class="alert success" role="status">
                 Document metadata saved.
             </div>
@@ -191,14 +191,12 @@
         </mat-step>
     </mat-stepper>
 
-    @if (hasParty() && hasDocument()) {
+    @if (addedParties().length > 0 && addedDocuments().length > 0) {
     <div class="alert success" role="status">
         Saved. Contract remains Draft.
     </div>
     }
 
-    <p class="hint">
-        Session lists only. Saved data remains after refresh.
-    </p>
+   
     }
 </section>
