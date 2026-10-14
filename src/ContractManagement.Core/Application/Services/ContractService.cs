@@ -100,7 +100,30 @@ public class ContractService : IContractService
             Terminated: CountOf(ContractStatus.Terminated),
             TotalActiveContractValue: totalActiveValue);
     }
-    
+
+    public async Task<IReadOnlyList<ContractAuditEntryResponse>> GetAuditHistoryAsync(
+        int contractId, CancellationToken cancellationToken = default)
+    {
+        var exists = await _dbContext.Contracts.AnyAsync(c => c.Id == contractId, cancellationToken);
+        if (!exists)
+            throw new NotFoundException("Contract", contractId);
+
+        // LEFT JOIN to Users: the log stays even if the user is removed (no FK on purpose)
+        return await (
+            from a in _dbContext.AuditLogs
+            where a.EntityType == AuditEntityType.Contract && a.EntityId == contractId
+            join u in _dbContext.Users on a.PerformedById equals u.Id into users
+            from u in users.DefaultIfEmpty()
+            orderby a.PerformedAt
+            select new ContractAuditEntryResponse(
+                a.Action.ToString(),
+                a.OldValue,
+                a.NewValue,
+                a.PerformedAt,
+                u == null ? null : u.FirstName + " " + u.LastName)
+        ).ToListAsync(cancellationToken);
+    }
+
     public async Task AddPartyAsync(
         int contractId,
         AddContractPartyRequest request,

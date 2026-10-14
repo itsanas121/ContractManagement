@@ -40,6 +40,16 @@ public class ContractsController : ControllerBase
         return Ok(await _contracts.GetSummaryAsync(cancellationToken));
     }
 
+    [HttpGet("{id:int}/audit")]
+    [ProducesResponseType(typeof(IReadOnlyList<ContractAuditEntryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<ContractAuditEntryResponse>>> GetAuditHistory(
+    int id, CancellationToken cancellationToken)
+    {
+        return Ok(await _contracts.GetAuditHistoryAsync(id, cancellationToken));
+    }
+
     [HttpPost("{id:int}/parties")]
     [Authorize(Roles = nameof(UserRole.ContractManager))]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
