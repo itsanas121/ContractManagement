@@ -76,3 +76,15 @@ export interface AddContractDocumentRequest {
 export interface AddedContractParty extends AddContractPartyRequest {
   name: string;
 }
+
+export interface ContractSummary {
+  totalContracts: number;
+  draft: number;
+  underReview: number;
+  approved: number;
+  rejected: number;
+  active: number;
+  expired: number;
+  terminated: number;
+  totalActiveContractValue: number;
+}

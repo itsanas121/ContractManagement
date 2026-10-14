@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { Router, RouterLink, RouterLinkActive} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { CurrentUserService } from '../../core/auth/current-user';
 
@@ -20,9 +20,16 @@ export class Navbar {
   private readonly currentUser = inject(CurrentUserService);
 
   readonly role = this.currentUser.user?.role ?? '';
+  readonly email = this.currentUser.user?.email ?? '';
+
+  readonly roleLabel: Record<string, string> = {
+    Administrator: 'Administrator',
+    ContractManager: 'Contract Manager',
+    Reviewer: 'Reviewer',
+  };
 
   logout(): void {
     this.auth.logout();
-    void this.router.navigateByUrl('/login')
+    void this.router.navigateByUrl('/login');
   }
 }

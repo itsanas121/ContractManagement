@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { ContractSummary } from './contract.models';
 import { environment } from '../../../environments/environment';
 import {
   AddContractDocumentRequest,
@@ -37,5 +37,8 @@ export class ContractService {
       `${this.baseUrl}/${contractId}/documents`,
       request,
     );
+  }
+  getSummary(): Observable<ContractSummary> {
+    return this.http.get<ContractSummary>(`${this.baseUrl}/summary`);
   }
 }

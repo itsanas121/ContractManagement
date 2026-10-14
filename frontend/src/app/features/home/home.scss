@@ -1,17 +1,129 @@
 .home {
-  max-width: 60rem;
+  max-width: 1200px;
   margin-inline: auto;
-  padding: 2rem 1rem;
+  padding: 24px 32px;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.page-head {
+  margin-bottom: 20px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #0f172a;
+  }
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: #64748b;
+}
+
+.value-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .value {
+    font-size: 32px;
+    color: #1d4ed8;
+
+    small {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+}
+
+.note {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.card {
+  --color: #64748b;
+  --bg: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #475569;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+    padding: 6px;
+    border-radius: 8px;
+    color: var(--color);
+    background: var(--bg);
+  }
+}
+
+.label {
+  font-size: 14px;
+  color: #475569;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+// Subtle status colors (icon only)
+.total      { --color: #334155; --bg: #f1f5f9; }
+.draft      { --color: #64748b; --bg: #f1f5f9; }
+.review     { --color: #b45309; --bg: #fef3c7; }
+.approved   { --color: #1d4ed8; --bg: #dbeafe; }
+.rejected   { --color: #b91c1c; --bg: #fee2e2; }
+.active     { --color: #15803d; --bg: #dcfce7; }
+.expired    { --color: #7e22ce; --bg: #f3e8ff; }
+.terminated { --color: #7f1d1d; --bg: #fee2e2; }
+
+.error {
+  color: #b91c1c;
+}
+
+@media (max-width: 900px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .home {
+    padding: 16px;
+  }
+
+  .value-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
