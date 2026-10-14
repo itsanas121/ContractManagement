@@ -11,6 +11,13 @@ public interface IContractService
 
     Task AddDocumentAsync(
         int contractId, AddContractDocumentRequest request, CancellationToken cancellationToken = default);
+
+    Task<ContractSummaryResponse> GetSummaryAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ContractAuditEntryResponse>> GetAuditHistoryAsync(
+        int contractId, CancellationToken cancellationToken = default);
+        
     Task<ContractDetailsResponse> GetByIdAsync(
-    int contractId, CancellationToken cancellationToken = default);
+        int contractId, CancellationToken cancellationToken = default);
 }
