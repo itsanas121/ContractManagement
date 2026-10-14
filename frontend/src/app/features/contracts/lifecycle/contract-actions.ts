@@ -1,9 +1,10 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Observable } from 'rxjs';
+import { Observable, finalize } from 'rxjs';
 import { ContractLifecycleService } from './contract-lifecycle.service';
 import { CurrentUserService } from '../../../core/auth/current-user';
 import { apiErrorMessages } from './api-errors';
@@ -21,17 +22,23 @@ type ReasonAction = 'reject' | 'terminate';
 export class ContractActions {
   private readonly lifecycle = inject(ContractLifecycleService);
   private readonly currentUser = inject(CurrentUserService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Data from the parent page
   contractId = input.required<number>();
   status = input.required<string>();
   ownerId = input.required<number>();
+  readonly disabled = input(false);
+  readonly busyChange = output<boolean>();
 
   // Tells the parent page to reload the contract after a successful action
   changed = output<void>();
 
   // Screen state
   loading = signal(false);
+  readonly busy = computed(
+    () => this.loading() || this.disabled(),
+  );
   errors = signal<string[]>([]);
   successMessage = signal('');
   reasonFor = signal<ReasonAction | null>(null);
@@ -62,6 +69,9 @@ export class ContractActions {
   }
 
   openReason(action: ReasonAction): void {
+    if (this.busy()) {
+      return;
+    }
     this.reasonFor.set(action);
     this.reason = '';
     this.errors.set([]);
@@ -73,6 +83,9 @@ export class ContractActions {
   }
 
   confirmReason(): void {
+    if (this.busy()) {
+  return;
+}
     const reason = this.reason.trim();
     if (!reason) {
       this.errors.set(['A reason is required.']);
@@ -88,22 +101,36 @@ export class ContractActions {
   }
 
   // Shared by all actions: loading state, success message, errors
-  private run(request: Observable<void>, successText: string): void {
-    this.loading.set(true);
-    this.errors.set([]);
-    this.successMessage.set('');
+private run(request: Observable<void>, successText: string): void {
+  if (this.busy()) {
+    return;
+  }
 
-    request.subscribe({
-      next: () => {
+  this.loading.set(true);
+  this.busyChange.emit(true);
+  this.errors.set([]);
+  this.successMessage.set('');
+
+  request
+    .pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => {
         this.loading.set(false);
+
+        if (!this.destroyRef.destroyed) {
+          this.busyChange.emit(false);
+        }
+      }),
+    )
+    .subscribe({
+      next: () => {
         this.reasonFor.set(null);
         this.successMessage.set(successText);
         this.changed.emit();
       },
       error: (error) => {
-        this.loading.set(false);
         this.errors.set(apiErrorMessages(error));
       },
     });
-  }
+}
 }

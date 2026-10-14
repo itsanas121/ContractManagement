@@ -1,0 +1,108 @@
+<section class="contract-details">
+    <header class="page-header">
+        <h1>Contract details</h1>
+        <a mat-button routerLink="/home">Back to home</a>
+    </header>
+
+    @if (loading()) {
+    <p role="status" aria-live="polite">Loading contract...</p>
+    } @else if (errors().length > 0) {
+    <div class="alert error" role="alert">
+        <ul>
+            @for (message of errors(); track $index) {
+            <li>{{ message }}</li>
+            }
+        </ul>
+    </div>
+
+    @if (canRetry()) {
+    <button mat-button type="button" (click)="reload()">
+        Retry
+    </button>
+    }
+
+    } @else if (contract(); as contract) {
+    <section class="summary" aria-labelledby="contract-summary-title">
+        <div class="section-header">
+            <h2 id="contract-summary-title">{{ contract.title }}</h2>
+            <span class="status">{{ contract.status }}</span>
+        </div>
+
+        <dl>
+            <dt>Contract ID</dt>
+            <dd>{{ contract.id }}</dd>
+
+            <dt>Contract number</dt>
+            <dd>{{ contract.contractNumber }}</dd>
+
+            <dt>Type</dt>
+            <dd>{{ contract.contractType }}</dd>
+
+            <dt>Value</dt>
+            <dd>{{ contract.contractValue }}</dd>
+
+            <dt>Start date</dt>
+            <dd>{{ contract.startDate }}</dd>
+
+            <dt>End date</dt>
+            <dd>{{ contract.endDate }}</dd>
+
+            <dt>Company</dt>
+            <dd>{{ contract.companyName }}</dd>
+
+            <dt>Owner</dt>
+            <dd>{{ contract.ownerName }}</dd>
+
+            @if (contract.description) {
+            <dt>Description</dt>
+            <dd class="description">{{ contract.description }}</dd>
+            }
+        </dl>
+    </section>
+
+    <section class="details-section" aria-labelledby="parties-title">
+        <h2 id="parties-title">Parties</h2>
+
+        @if (contract.parties.length === 0) {
+        <p class="hint">No parties added.</p>
+        } @else {
+        <ul class="saved-list">
+            @for (party of contract.parties; track party.partyId) {
+            <li>{{ party.name }} — {{ party.partyRole }}</li>
+            }
+        </ul>
+        }
+    </section>
+
+    <section class="details-section" aria-labelledby="documents-title">
+        <h2 id="documents-title">Documents</h2>
+
+        @if (contract.documents.length === 0) {
+        <p class="hint">No document metadata added.</p>
+        } @else {
+        <ul class="saved-list">
+            @for (document of contract.documents; track document.id) {
+            <li>
+                {{ document.fileName }} — {{ document.documentType }}
+
+                @if (document.filePath) {
+                <span class="file-path">{{ document.filePath }}</span>
+                }
+            </li>
+            }
+        </ul>
+        }
+    </section>
+
+    @if (canEditAttachments) {
+    <app-contract-attachments [contract]="contract" [savedParties]="contract.parties"
+        [savedDocuments]="contract.documents" [disabled]="lifecycleBusy()" (busyChange)="attachmentsBusy.set($event)"
+        (changed)="attachmentsChanged()" />
+    }
+
+    <app-contract-actions [contractId]="contract.id" [status]="contract.status" [ownerId]="contract.ownerId"
+        [disabled]="attachmentsBusy()" (busyChange)="lifecycleBusy.set($event)" (changed)="lifecycleChanged()" />
+    } @else {
+    <p class="hint">No contract data available.</p>
+    }
+</section>

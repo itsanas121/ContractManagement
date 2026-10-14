@@ -18,27 +18,27 @@
       <div class="reason-box">
         <mat-form-field appearance="outline">
           <mat-label>{{ reasonFor() === 'reject' ? 'Rejection reason' : 'Termination reason' }}</mat-label>
-          <textarea matInput rows="3" maxlength="1000" [(ngModel)]="reason"></textarea>
+          <textarea matInput rows="3" maxlength="1000" [(ngModel)]="reason" [disabled]="busy()"></textarea>
         </mat-form-field>
         <div class="buttons">
-          <button mat-flat-button (click)="confirmReason()" [disabled]="loading()">Confirm</button>
-          <button mat-button (click)="cancelReason()" [disabled]="loading()">Cancel</button>
+          <button mat-flat-button (click)="confirmReason()" [disabled]="busy()">Confirm</button>
+          <button mat-button (click)="cancelReason()" [disabled]="busy()">Cancel</button>
         </div>
       </div>
     } @else {
       <div class="buttons">
         @if (canSubmit()) {
-          <button mat-flat-button (click)="submit()" [disabled]="loading()">Submit for review</button>
+          <button mat-flat-button (click)="submit()" [disabled]="busy()">Submit for review</button>
         }
         @if (canReview()) {
-          <button mat-flat-button (click)="approve()" [disabled]="loading()">Approve</button>
-          <button mat-stroked-button (click)="openReason('reject')" [disabled]="loading()">Reject</button>
+          <button mat-flat-button (click)="approve()" [disabled]="busy()">Approve</button>
+          <button mat-stroked-button (click)="openReason('reject')" [disabled]="busy()">Reject</button>
         }
         @if (canActivate()) {
-          <button mat-flat-button (click)="activate()" [disabled]="loading()">Activate</button>
+          <button mat-flat-button (click)="activate()" [disabled]="busy()">Activate</button>
         }
         @if (canTerminate()) {
-          <button mat-stroked-button (click)="openReason('terminate')" [disabled]="loading()">Terminate</button>
+          <button mat-stroked-button (click)="openReason('terminate')" [disabled]="busy()">Terminate</button>
         }
       </div>
     }

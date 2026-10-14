@@ -12,4 +12,13 @@ export const CONTRACTS_ROUTES: Routes = [
         (m) => m.ContractCreate,
       ),
   },
+
+  {
+  path: ':id',
+  title: 'Contract details | Contract Management',
+  loadComponent: () =>
+    import('./contract-details/contract-details').then(
+      (m) => m.ContractDetails,
+    ),
+},
 ];

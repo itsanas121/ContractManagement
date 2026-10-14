@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import {
   AddContractDocumentRequest,
   AddContractPartyRequest,
+  ContractDetailsResponse,
   ContractResponse,
   CreateContractRequest,
 } from './contract.models';
@@ -18,6 +19,12 @@ export class ContractService {
   create(request: CreateContractRequest): Observable<ContractResponse> {
     return this.http.post<ContractResponse>(this.baseUrl, request);
   }
+
+getById(contractId: number): Observable<ContractDetailsResponse> {
+    return this.http.get<ContractDetailsResponse>(
+        `${this.baseUrl}/${contractId}`,
+  );
+}
 
   addParty(
     contractId: number,
