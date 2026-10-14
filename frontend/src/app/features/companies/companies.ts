@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroupDirective } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -23,6 +23,9 @@ import { HttpErrorResponse } from '@angular/common/http';
   templateUrl: './companies.html',
 })
 export class Companies implements OnInit{
+  @ViewChild(FormGroupDirective)
+  private formDirective?: FormGroupDirective;
+
   private readonly fb = inject(FormBuilder);
   private readonly companyService = inject(CompanyService);
 
@@ -103,7 +106,7 @@ export class Companies implements OnInit{
           this.successMessage =
             `Company "${createdCompany.name}" created successfully.`;
 
-          this.companyForm.reset();
+          this.formDirective?.resetForm();
           this.loadCompanies();
         },
         error: (error: HttpErrorResponse) => {
