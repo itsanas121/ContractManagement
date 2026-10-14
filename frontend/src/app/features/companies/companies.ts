@@ -41,6 +41,11 @@ export class Companies implements OnInit{
   submitError = '';
   successMessage = '';
 
+  // handle company activate/deactivate
+  updatingCompanyId: number | null = null;
+  statusError = '';
+  statusSuccess = '';
+
   
   companyForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.pattern(/\S/)]],
