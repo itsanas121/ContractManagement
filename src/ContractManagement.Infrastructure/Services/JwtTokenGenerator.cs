@@ -29,7 +29,8 @@ namespace ContractManagement.Infrastructure.Services;
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("role", user.Role.ToString())
+                new Claim("role", user.Role.ToString()),
+                new Claim("companyId", user.CompanyId.ToString())
             };
 
             // jwtkey -> encoded -> bytes -> SymmtricSecurityKey -> SigningCredentials -> SHA256
