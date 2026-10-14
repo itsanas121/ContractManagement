@@ -47,7 +47,10 @@
     </section>
 
     <app-contract-attachments [contract]="contract" (busyChange)="attachmentsBusy.set($event)" />
-
+    <a mat-button [routerLink]="['/contracts', contract.id]" [attr.aria-disabled]="attachmentsBusy()"
+        [tabIndex]="attachmentsBusy() ? -1 : 0" (click)="attachmentsBusy() ? $event.preventDefault() : null">
+        View contract
+    </a>
     <button mat-flat-button type="button" (click)="createAnother()" [disabled]="attachmentsBusy()">
         Create another contract
     </button>

@@ -77,6 +77,29 @@ export interface AddedContractParty extends AddContractPartyRequest {
   name: string;
 }
 
+export interface ContractPartyResponse {
+  partyId: number;
+  name: string;
+  partyRole: PartyRole;
+  addedDate: string;
+}
+
+export interface ContractDocumentResponse {
+  id: number;
+  fileName: string;
+  documentType: DocumentType;
+  filePath: string | null;
+  uploadedById: number;
+  uploadedDate: string;
+}
+
+export interface ContractDetailsResponse extends ContractResponse {
+  companyName: string;
+  ownerName: string;
+  parties: ContractPartyResponse[];
+  documents: ContractDocumentResponse[];
+}
+
 export interface ContractSummary {
   totalContracts: number;
   draft: number;
@@ -87,4 +110,5 @@ export interface ContractSummary {
   expired: number;
   terminated: number;
   totalActiveContractValue: number;
+
 }

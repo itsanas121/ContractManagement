@@ -37,6 +37,8 @@ import {
   DocumentType,
   PARTY_ROLES,
   PartyRole,
+  ContractPartyResponse,
+  ContractDocumentResponse,
 } from '../contract.models';
 import { ContractService } from '../contract.service';
 import { apiErrorMessages } from '../lifecycle/api-errors';
@@ -58,6 +60,12 @@ import { apiErrorMessages } from '../lifecycle/api-errors';
 })
 export class ContractAttachments {
   readonly contract = input.required<ContractResponse>();
+
+  readonly savedParties = input<readonly ContractPartyResponse[]>([]);
+  readonly savedDocuments = input<readonly ContractDocumentResponse[]>([]);
+  readonly disabled = input(false);
+
+  readonly changed = output<void>();
   readonly busyChange = output<boolean>();
 
   private readonly fb = inject(NonNullableFormBuilder);
@@ -89,16 +97,26 @@ export class ContractAttachments {
     () => this.savingParty() || this.savingDocument(),
   );
 
-  readonly hasParty = computed(() => this.addedParties().length > 0);
-  readonly hasDocument = computed(() => this.addedDocuments().length > 0);
+readonly hasParty = computed(
+  () =>
+    this.savedParties().length > 0 ||
+    this.addedParties().length > 0,
+);
+
+readonly hasDocument = computed(
+  () =>
+    this.savedDocuments().length > 0 ||
+    this.addedDocuments().length > 0,
+);
 
   readonly availableParties = computed(() => {
-    const addedIds = new Set(
-      this.addedParties().map((party) => party.partyId),
-    );
-
-    return this.parties().filter((party) => !addedIds.has(party.id));
-  });
+    const linkedIds = new Set([
+        ...this.savedParties().map((party) => party.partyId),
+        ...this.addedParties().map((party) => party.partyId),
+  ]);
+  
+  return this.parties().filter((party) => !linkedIds.has(party.id));
+});
 
   readonly partyForm = this.fb.group({
     partyId: this.fb.control<number | null>(
@@ -223,7 +241,9 @@ export class ContractAttachments {
         takeUntilDestroyed(this.destroyRef),
         finalize(() => {
           this.savingParty.set(false);
+           if (!this.destroyRef.destroyed) {
           this.busyChange.emit(false);
+           }
         }),
       )
       .subscribe({
@@ -233,6 +253,7 @@ export class ContractAttachments {
             { ...request, name: selectedParty.name },
           ]);
           formDirective.resetForm();
+           this.changed.emit();
         },
         error: (error) => {
           this.partyErrors.set(apiErrorMessages(error));
@@ -284,7 +305,9 @@ export class ContractAttachments {
         takeUntilDestroyed(this.destroyRef),
         finalize(() => {
           this.savingDocument.set(false);
+          if (!this.destroyRef.destroyed) {
           this.busyChange.emit(false);
+           }
         }),
       )
       .subscribe({
@@ -294,6 +317,7 @@ export class ContractAttachments {
             request,
           ]);
           formDirective.resetForm();
+          this.changed.emit();
         },
         error: (error) => {
           this.documentErrors.set(apiErrorMessages(error));
