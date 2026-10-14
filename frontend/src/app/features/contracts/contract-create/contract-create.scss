@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+.contract-create {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+mat-form-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+
+  p,
+  ul {
+    margin: 0;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+  }
+}
+
+.error {
+  background: #fdecea;
+  color: #b00020;
+}
+
+.success {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.hint {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.date-error {
+  color: #b00020;
+  margin: 0 0 0.75rem;
+}
+
+.summary {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin-top: 0;
+    overflow-wrap: anywhere;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 0.75rem 1rem;
+  }
+
+  dt {
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .description {
+    white-space: pre-wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .summary dl {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+
+    dd {
+      margin-bottom: 0.75rem;
+    }
+  }
+}
