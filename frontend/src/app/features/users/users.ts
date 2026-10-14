@@ -7,10 +7,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { UserService } from './user.service';
 import { CompanyService } from '../companies/company.service';
-import { CreateUserRequest, UserRole } from './user.models';
+import { CreateUserRequest, UserResponse, UserRole } from './user.models';
 import { CompanyResponse } from '../companies/company.models';
 import { finalize } from 'rxjs';
 import { apiErrorMessages } from '../contracts/lifecycle/api-errors';
+import { DatePipe } from '@angular/common';
+
 
 @Component({
   imports: [
@@ -47,6 +49,17 @@ export class Users implements OnInit {
   companyLoadError = '';
   submitError = '';
   successMessage = '';
+
+
+  users: UserResponse[] = [];
+
+  loadingUsers = false;
+  loadError = '';
+
+  updatingUserId: number | null = null;
+  statusError = '';
+  statusSuccess = '';
+
 
   userForm = this.fb.nonNullable.group({
     firstName: ['', [
@@ -87,6 +100,7 @@ export class Users implements OnInit {
 
   ngOnInit(): void {
     this.loadCompanies();
+    this.loadUsers();
   }
 
   loadCompanies(): void {
@@ -107,6 +121,12 @@ export class Users implements OnInit {
             apiErrorMessages(error).join(' ');
         }
       });
+  }
+
+  getCompanyName(companyId: number): string {
+    return this.companies.find(
+      company => company.id === companyId
+    )?.name ?? `Company #${companyId}`;
   }
 
   onSubmit(): void {
@@ -164,6 +184,9 @@ export class Users implements OnInit {
             department: '',
             phoneNumber: ''
           });
+
+          // load users
+          this.loadUsers();
         },
         error: error => {
           this.submitError =
@@ -171,4 +194,59 @@ export class Users implements OnInit {
         }
       });
   }
+
+  loadUsers(): void {
+    this.loadingUsers = true;
+    this.loadError = '';
+
+    this.userService.getAll()
+      .pipe(finalize(() => {
+        this.loadingUsers = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: users => {
+          this.users = users;
+        },
+        error: error => {
+          this.loadError = apiErrorMessages(error).join(' ');
+        }
+      });
+  }
+
+
+  toggleUserStatus(user: UserResponse): void {
+    if (this.updatingUserId !== null) return;
+
+    const isActive = user.status === 'Active';
+
+    const request$ = isActive
+      ? this.userService.deactivate(user.id)
+      : this.userService.activate(user.id);
+
+    this.updatingUserId = user.id;
+    this.statusError = '';
+    this.statusSuccess = '';
+
+    request$
+      .pipe(finalize(() => {
+        this.updatingUserId = null;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: () => {
+          this.statusSuccess =
+            `User "${user.firstName} ${user.lastName}" ${isActive ? 'deactivated' : 'activated'
+            } successfully.`;
+
+          this.loadUsers();
+        },
+        error: error => {
+          this.statusError =
+            apiErrorMessages(error).join(' ');
+        }
+      });
+  }
+
+
 }
