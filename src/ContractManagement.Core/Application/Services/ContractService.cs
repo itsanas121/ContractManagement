@@ -100,7 +100,44 @@ public class ContractService : IContractService
             Terminated: CountOf(ContractStatus.Terminated),
             TotalActiveContractValue: totalActiveValue);
     }
-    
+
+    public async Task<IReadOnlyList<ContractAuditEntryResponse>> GetAuditHistoryAsync(
+        int contractId, CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.UserId
+            ?? throw new ForbiddenException("No logged-in user.");
+
+        var userCompanyId = await _dbContext.Users
+            .Where(u => u.Id == userId)
+            .Select(u => (int?)u.CompanyId)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("User", userId);
+
+        var contractCompanyId = await _dbContext.Contracts
+            .Where(c => c.Id == contractId)
+            .Select(c => (int?)c.CompanyId)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("Contract", contractId);
+
+        if (contractCompanyId != userCompanyId)
+            throw new ForbiddenException("You can only view the history of your own company's contracts.");
+
+        // LEFT JOIN to Users: the log stays even if the user is removed (no FK on purpose)
+        return await (
+            from a in _dbContext.AuditLogs
+            where a.EntityType == AuditEntityType.Contract && a.EntityId == contractId
+            join u in _dbContext.Users on a.PerformedById equals u.Id into users
+            from u in users.DefaultIfEmpty()
+            orderby a.PerformedAt
+            select new ContractAuditEntryResponse(
+                a.Action.ToString(),
+                a.OldValue,
+                a.NewValue,
+                a.PerformedAt,
+                u == null ? null : u.FirstName + " " + u.LastName)
+        ).ToListAsync(cancellationToken);
+    }
+
     public async Task AddPartyAsync(
         int contractId,
         AddContractPartyRequest request,
