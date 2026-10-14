@@ -257,11 +257,12 @@ public class UserServiceTests : IDisposable
         // Assert
         Assert.Equal(2, users.Count);
 
-        Assert.Equal("Ahmed", users[0].FirstName);
-        Assert.Equal("Zaid", users[1].FirstName);
+        var ahmedResult = Assert.Single(users, u => u.FirstName == "Ahmed");
+        var zaidResult = Assert.Single(users, u => u.FirstName == "Zaid");
 
-        Assert.Equal("Developer", users[0].Profile?.JobTitle);
-        Assert.Equal("IT", users[0].Profile?.Department);
+        Assert.Equal("Developer", ahmed.Profile?.JobTitle);
+        Assert.Equal("IT", ahmed.Profile?.Department);
+        Assert.Null(zaid.Profile);
     }
 
     [Fact]
@@ -344,5 +345,62 @@ public class UserServiceTests : IDisposable
         Assert.Equal(2, await db.Users.CountAsync());
     }
 
+    [Theory]
+    [InlineData("FirstName")]
+    [InlineData("LastName")]
+    [InlineData("Email")]
+    [InlineData("EmployeeNumber")]
+    public async Task Register_user_with_missing_required_field_is_rejected(
+        string missingField)
+    {
+        using var db = _database.CreateContext();
+
+        var company = new Company(
+            "Test Company", "TEST-001", null, null, null);
+
+        db.Companies.Add(company);
+        await db.SaveChangesAsync();
+
+        var service = new UserService(
+            db, _audit, _currentUser,
+            new PasswordHasher<User>());
+
+        var request = new CreateUserRequest
+        {
+            FirstName = "Ahmed",
+            LastName = "Ali",
+            Email = "ahmed@test.com",
+            EmployeeNumber = "EMP-001",
+            Password = "TestPassword123!",
+            Role = UserRole.ContractManager,
+            CompanyId = company.Id
+        };
+
+        // Make one required field empty per test case
+        switch (missingField)
+        {
+            case "FirstName":
+                request.FirstName = "";
+                break;
+
+            case "LastName":
+                request.LastName = "";
+                break;
+
+            case "Email":
+                request.Email = "";
+                break;
+
+            case "EmployeeNumber":
+                request.EmployeeNumber = "";
+                break;
+        }
+
+        await Assert.ThrowsAsync<DomainException>(
+            () => service.CreateAsync(request));
+
+        Assert.Empty(await db.Users.ToListAsync());
+        Assert.Empty(_audit.Calls);
+    }
 
 }
