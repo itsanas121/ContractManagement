@@ -128,4 +128,37 @@ export class Companies implements OnInit{
       });
 
   }
+
+  toggleCompanyStatus(company: CompanyResponse): void {
+    if (this.updatingCompanyId !== null) return;
+
+    const isActive = company.status === 'Active';
+
+    const request$ = isActive
+      ? this.companyService.deactivate(company.id)
+      : this.companyService.activate(company.id);
+
+    this.updatingCompanyId = company.id;
+    this.statusError = '';
+    this.statusSuccess = '';
+
+    request$
+      .pipe(finalize(() => {
+        this.updatingCompanyId = null;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: () => {
+          this.statusSuccess = `Company "${company.name}" ${isActive ? 'deactivated' : 'activated'
+            } successfully.`;
+
+          this.loadCompanies();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.statusError =
+            error.error?.detail ||
+            'Could not update company status.';
+        }
+      });
+  }
 }
