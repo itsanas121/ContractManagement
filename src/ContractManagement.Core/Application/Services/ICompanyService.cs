@@ -16,4 +16,11 @@ public interface ICompanyService
     Task<List<CompanyResponse>> GetAllAsync(
         CancellationToken cancellationToken = default);
 
+    Task ActivateAsync(
+        int companyId,
+        CancellationToken cancellationToken = default);
+
+    Task DeactivateAsync(
+        int companyId,
+        CancellationToken cancellationToken = default);
 }
