@@ -11,4 +11,6 @@ public interface IContractService
 
     Task AddDocumentAsync(
         int contractId, AddContractDocumentRequest request, CancellationToken cancellationToken = default);
+    Task<ContractDetailsResponse> GetByIdAsync(
+    int contractId, CancellationToken cancellationToken = default);
 }
