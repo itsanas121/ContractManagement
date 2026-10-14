@@ -202,6 +202,9 @@ dotnet run --project src/ContractManagement.Api
 
 Then open Swagger at `http://localhost:<port>/swagger` (the port is shown in the terminal).
 
+> To use the Angular app, run the **https** profile, since the frontend calls `https://localhost:7287`:
+> `dotnet run --project src/ContractManagement.Api --launch-profile https`
+
 > **Secrets** (database passwords, JWT signing keys) go in `dotnet user-secrets`, never in `appsettings` files.
 
 ## Frontend
@@ -224,12 +227,65 @@ API configuration, folder conventions, and feature development.
 
 Any other transition is rejected by the domain (e.g. Draft → Active, Approved → Draft).
 
+## API endpoints
+
+All endpoints except login require `Authorization: Bearer <token>`.
+
+| Method | Endpoint | Role | Purpose |
+|---|---|---|---|
+| POST | `/api/auth/login` | Anyone | Log in and receive a JWT |
+| GET | `/api/companies` | Administrator | List companies |
+| POST | `/api/companies` | Administrator | Register a company |
+| POST | `/api/companies/{id}/activate` | Administrator | Activate a company |
+| POST | `/api/companies/{id}/deactivate` | Administrator | Deactivate a company |
+| GET | `/api/users` | Administrator | List users |
+| POST | `/api/users` | Administrator | Register a user (role, company, optional profile) |
+| POST | `/api/users/{id}/activate` | Administrator | Activate a user |
+| POST | `/api/users/{id}/deactivate` | Administrator | Deactivate a user (their token stops working immediately) |
+| GET | `/api/parties` | Administrator, ContractManager | List parties |
+| POST | `/api/parties/individual` | Administrator, ContractManager | Register an individual party |
+| POST | `/api/parties/organization` | Administrator, ContractManager | Register an organization party |
+| POST | `/api/contracts` | ContractManager | Create a contract (always Draft) |
+| POST | `/api/contracts/{id}/parties` | ContractManager (owner) | Add a party with a role (Draft only) |
+| POST | `/api/contracts/{id}/documents` | ContractManager (owner) | Add document metadata (Draft only) |
+| POST | `/api/contracts/{id}/submit` | ContractManager (owner) | Draft → Under Review |
+| POST | `/api/contracts/{id}/approve` | Reviewer | Under Review → Approved |
+| POST | `/api/contracts/{id}/reject` | Reviewer | Under Review → Rejected (reason required) |
+| POST | `/api/contracts/{id}/activate` | ContractManager (owner) | Approved → Active |
+| POST | `/api/contracts/{id}/terminate` | ContractManager (owner) | Active → Terminated (reason required) |
+
+Full request and response details are in Swagger (`/swagger`).
+
+### Error responses
+
+Errors use `ProblemDetails` (`title`, `status`, `detail`; validation errors also include `errors`).
+
+| Status | Meaning |
+|---|---|
+| 400 | Missing/invalid field, or a business rule was broken |
+| 401 | No token, or the token is invalid/expired |
+| 403 | Logged in, but not allowed (wrong role, or not the contract owner) |
+| 404 | The contract, party, company or user does not exist |
+| 409 | Wrong contract status for this action, or the contract was changed by someone else |
+
+## Assumptions and team decisions
+
+Where the specification leaves a choice open, we decided:
+
+- **Roles:** three roles: Administrator (companies, users, parties), ContractManager (creates and runs contracts), Reviewer (approves or rejects).
+- **Ownership:** the user who creates a contract is its owner. Only the owner can edit it, submit it, activate it and terminate it.
+- **Review:** a reviewer must be active, in the same company as the contract, and cannot review a contract they own.
+- **Activation** is a manual action by the owner (the spec's "start date reached" is a condition checked at activation, not an automatic step).
+- **Documents:** only metadata is stored; physical file upload is optional and not implemented.
+- **Dates:** times are stored in UTC.
+- **Frontend checks are convenience only:** hidden buttons and route guards improve the experience, but the API enforces every rule.
+
 ## Key design decisions
 
 - **Rich domain model:** entities protect their own state (`private set`) and expose business methods; invalid objects cannot be created.
 - **Party inheritance:** `IndividualParty` and `OrganizationParty` share one table (Table-Per-Hierarchy).
 - **Enums stored as text** so tables and audit entries are readable.
-- **Optimistic concurrency** on contracts (`RowVersion`) to prevent conflicting updates.
+- **Optimistic concurrency** on contracts (`RowVersion`) to prevent conflicting updates; a conflict returns 409.
 - **Audit entries are saved in the same transaction** as the change they describe.
 
 ## Development workflow
@@ -247,10 +303,13 @@ We use **GitFlow**:
 - [x] Database and initial migration
 - [x] Error handling and Swagger
 - [x] Audit service
-- [ ] JWT login and role-based authorization
-- [ ] Angular frontend
-- [ ] Companies, users, parties, and contract features (API + UI)
+- [x] JWT login and role-based authorization
+- [x] Companies, users, parties, create contract, parties/documents, lifecycle actions (API)
+- [x] Screens: login, companies, parties, create contract, lifecycle actions, role-based route guards
+- [ ] Users screen (in review)
+- [ ] Contract details page and contract list
 - [ ] Contract search, expiration job, audit history, dashboard
+- [ ] Release v1.0
 
 ## Team
 
