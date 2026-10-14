@@ -30,6 +30,15 @@ export const routes: Routes = [
       import('./features/parties/parties.routes').then((m) => m.PARTIES_ROUTES),
   },
   {
+    path: 'companies',
+    "title": 'Company Management | Contract Management System',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/companies/companies')
+        .then((m) => m.Companies
+        ),
+  },
+  {
     path: '**',
     redirectTo: 'home',
   },
