@@ -50,6 +50,15 @@ export const routes: Routes = [
         ),
   },
   {
+    path: 'users',
+    title: 'User Management | Contract Management System',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Administrator'] },
+    loadComponent: () =>
+      import('./features/users/users')
+        .then(m => m.Users),
+  },
+  {
     path: '**',
     redirectTo: 'home',
   },
