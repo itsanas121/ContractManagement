@@ -17,4 +17,7 @@ public interface IContractService
 
     Task<IReadOnlyList<ContractAuditEntryResponse>> GetAuditHistoryAsync(
         int contractId, CancellationToken cancellationToken = default);
+        
+    Task<ContractDetailsResponse> GetByIdAsync(
+        int contractId, CancellationToken cancellationToken = default);
 }

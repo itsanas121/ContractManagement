@@ -18,7 +18,18 @@ public class ContractsController : ControllerBase
         _contracts = contracts;
     }
 
-    [HttpPost]
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(ContractDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ContractDetailsResponse>> GetById(
+            int id, CancellationToken cancellationToken)
+        {
+            var response = await _contracts.GetByIdAsync(id, cancellationToken);
+            return Ok(response);
+        }
+  [HttpPost]
     [Authorize(Roles = nameof(UserRole.ContractManager))]
     [ProducesResponseType(typeof(ContractResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
