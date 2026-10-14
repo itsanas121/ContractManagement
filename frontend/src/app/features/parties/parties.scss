@@ -1,0 +1,58 @@
+.parties {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.tabs {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.tabs .active {
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+form {
+    display: grid;
+    gap: .75rem;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+mat-button-toggle-group {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: .5rem 1rem;
+    border-radius: 4px;
+}
+
+.alert.error {
+    background: #fdecea;
+    color: #b00020;
+}
+
+.alert.success {
+    background: #e8f5e9;
+    color: #1b5e20;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow-x: auto;
+    display: block;
+}
+
+th,
+td {
+    padding: .5rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
