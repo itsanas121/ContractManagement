@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { RouterLink } from '@angular/router';
 import { UserService } from './user.service';
 import { CompanyService } from '../companies/company.service';
 import { CreateUserRequest, UserResponse, UserRole } from './user.models';
@@ -17,7 +16,6 @@ import { DatePipe } from '@angular/common';
 @Component({
   imports: [
     ReactiveFormsModule,
-    RouterLink,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
