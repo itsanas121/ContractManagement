@@ -72,6 +72,35 @@ public class ContractService : IContractService
             contract.ContractValue, contract.StartDate, contract.EndDate,
             contract.ContractType, contract.Status, contract.CompanyId, contract.OwnerId);
     }
+
+    public async Task<ContractSummaryResponse> GetSummaryAsync(CancellationToken cancellationToken = default)
+    {
+        // One query: SQL does GROUP BY Status + COUNT(*), we only receive one row per status.
+        var counts = await _dbContext.Contracts
+            .GroupBy(c => c.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        // One query: SQL does SUM(ContractValue) for active contracts only.
+        var totalActiveValue = await _dbContext.Contracts
+            .Where(c => c.Status == ContractStatus.Active)
+            .SumAsync(c => c.ContractValue, cancellationToken);
+
+        int CountOf(ContractStatus status) =>
+            counts.FirstOrDefault(x => x.Status == status)?.Count ?? 0;
+
+        return new ContractSummaryResponse(
+            TotalContracts: counts.Sum(x => x.Count),
+            Draft: CountOf(ContractStatus.Draft),
+            UnderReview: CountOf(ContractStatus.UnderReview),
+            Approved: CountOf(ContractStatus.Approved),
+            Rejected: CountOf(ContractStatus.Rejected),
+            Active: CountOf(ContractStatus.Active),
+            Expired: CountOf(ContractStatus.Expired),
+            Terminated: CountOf(ContractStatus.Terminated),
+            TotalActiveContractValue: totalActiveValue);
+    }
+    
     public async Task AddPartyAsync(
         int contractId,
         AddContractPartyRequest request,
