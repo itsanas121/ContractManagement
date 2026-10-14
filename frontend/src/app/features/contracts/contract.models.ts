@@ -99,3 +99,16 @@ export interface ContractDetailsResponse extends ContractResponse {
   parties: ContractPartyResponse[];
   documents: ContractDocumentResponse[];
 }
+
+export interface ContractSummary {
+  totalContracts: number;
+  draft: number;
+  underReview: number;
+  approved: number;
+  rejected: number;
+  active: number;
+  expired: number;
+  terminated: number;
+  totalActiveContractValue: number;
+
+}
