@@ -1,0 +1,97 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.contract-attachments {
+  margin-block: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #d9dee5;
+  border-radius: 12px;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.hint {
+  color: #52606d;
+  line-height: 1.6;
+}
+
+form {
+  margin-block: 1rem;
+}
+
+fieldset {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+mat-form-field {
+  width: 100%;
+  min-width: 0;
+}
+
+fieldset > button {
+  justify-self: start;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+
+.alert {
+  margin-block: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.alert ul {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+.success {
+  background: #edf7ee;
+  color: #1b5e20;
+}
+
+.error {
+  background: #fff1f0;
+  color: #a12622;
+}
+
+.saved-list {
+  padding-inline-start: 1.25rem;
+}
+
+.saved-list li {
+  margin-block: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.file-path {
+  display: block;
+  color: #52606d;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 600px) {
+  .contract-attachments {
+    padding: 0.75rem;
+  }
+
+  fieldset > button,
+  .actions > button {
+    width: 100%;
+  }
+}
