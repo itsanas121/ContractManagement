@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 export interface CurrentUser {
   id: number;
   role: string;
+  companyId: number;
 }
 
 // Reads the logged-in user's Id and role from the JWT payload.
@@ -22,7 +23,10 @@ export class CurrentUserService {
       const payload = token.split('.')[1];
       const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
       const claims = JSON.parse(json);
-      return { id: Number(claims.sub), role: claims.role };
+      return { 
+         id: Number(claims.sub),
+         role: claims.role,
+         companyId: Number(claims.companyId) };
     } catch {
       return null;
     }
