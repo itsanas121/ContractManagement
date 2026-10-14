@@ -1,6 +1,8 @@
+using ContractManagement.Core.Domain.Entities;
 using ContractManagement.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace ContractManagement.Core.Tests;
 
@@ -18,6 +20,7 @@ public sealed class TestDatabase : IDisposable
 
         _options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(_connection)
+            .ReplaceService<IModelCustomizer, SqliteRowVersionModelCustomizer>()
             .Options;
 
         using var context = CreateContext();
@@ -27,4 +30,22 @@ public sealed class TestDatabase : IDisposable
     public AppDbContext CreateContext() => new(_options);
 
     public void Dispose() => _connection.Dispose();
+}
+
+// SQLite has no rowversion, so give the column a default value; otherwise inserting a Contract fails.
+internal sealed class SqliteRowVersionModelCustomizer : RelationalModelCustomizer
+{
+    public SqliteRowVersionModelCustomizer(ModelCustomizerDependencies dependencies)
+        : base(dependencies)
+    {
+    }
+
+    public override void Customize(ModelBuilder modelBuilder, DbContext context)
+    {
+        base.Customize(modelBuilder, context);
+
+        modelBuilder.Entity<Contract>()
+            .Property(c => c.RowVersion)
+            .HasDefaultValueSql("(randomblob(8))");
+    }
 }
