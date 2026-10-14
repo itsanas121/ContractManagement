@@ -114,3 +114,65 @@ mat-form-field {
     padding: 24px;
   }
 }
+
+
+// Registered Users Table
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+
+// Active / Inactive Status
+.status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #fde8e8;
+  color: #b3261e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+  .status.active {
+    background: #e7f6eb;
+    color: #207a40;
+  }
+
+// Empty State
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: #777;
+}
+
+@media (max-width: 640px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
