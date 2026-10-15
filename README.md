@@ -6,7 +6,7 @@ A system for managing contracts between a company and external parties (customer
 
 Built as a team assignment in the AZEM Technical Internship Program at Saudi AZM.
 
-> **Status:** in active development. See the [roadmap](#roadmap) below.
+> **Status:** v1.0 released (Sprint 3). The full contract lifecycle works end to end, from the API and from the screens of each role. See the [roadmap](#roadmap) for what comes next.
 
 ---
 
@@ -16,9 +16,12 @@ Built as a team assignment in the AZEM Technical Internship Program at Saudi AZM
 - **Parties**: individuals and organizations, each with its own validation rules
 - **Contracts** with parties (and their roles) and attached documents
 - **Lifecycle operations** as explicit actions, never a generic status update:
-  submit, approve, reject, activate, terminate, and automatic expiration
+  submit, approve, reject, activate, terminate
 - **Business rules enforced in the domain**: e.g. a contract always starts as Draft, can only be submitted with at least one party and one document, and only a reviewer can approve or reject it
-- **Audit trail** recording every important action (who, what, when, old and new values)
+- **Audit trail** recording every important action (who, what, when, old and new values), with an audit history per contract
+- **Contract details page** with parties, documents and the actions allowed for the current user's role
+- **Dashboard** with the number of contracts per status and the total value of active contracts
+- **Company isolation:** users can only open the details and history of their own company's contracts
 - **Consistent error responses** (`ProblemDetails`) with clear validation messages
 
 ## Tech stack
@@ -223,7 +226,7 @@ API configuration, folder conventions, and feature development.
 | Reject (reason required) | Under Review | Rejected |
 | Activate | Approved | Active |
 | Terminate (reason required) | Active | Terminated |
-| Expire (background job) | Active, after the end date | Expired |
+| Expire (background job, planned) | Active, after the end date | Expired |
 
 Any other transition is rejected by the domain (e.g. Draft → Active, Approved → Draft).
 
@@ -246,6 +249,9 @@ All endpoints except login require `Authorization: Bearer <token>`.
 | POST | `/api/parties/individual` | Administrator, ContractManager | Register an individual party |
 | POST | `/api/parties/organization` | Administrator, ContractManager | Register an organization party |
 | POST | `/api/contracts` | ContractManager | Create a contract (always Draft) |
+| GET | `/api/contracts/{id}` | Any role (same company) | Contract details with company, owner, parties and documents |
+| GET | `/api/contracts/{id}/audit` | Any role (same company) | Audit history of the contract, in time order |
+| GET | `/api/contracts/summary` | Any role | Dashboard: count per status and total active value |
 | POST | `/api/contracts/{id}/parties` | ContractManager (owner) | Add a party with a role (Draft only) |
 | POST | `/api/contracts/{id}/documents` | ContractManager (owner) | Add document metadata (Draft only) |
 | POST | `/api/contracts/{id}/submit` | ContractManager (owner) | Draft → Under Review |
@@ -264,7 +270,7 @@ Errors use `ProblemDetails` (`title`, `status`, `detail`; validation errors also
 |---|---|
 | 400 | Missing/invalid field, or a business rule was broken |
 | 401 | No token, or the token is invalid/expired |
-| 403 | Logged in, but not allowed (wrong role, or not the contract owner) |
+| 403 | Logged in, but not allowed (wrong role, not the contract owner, or another company's contract) |
 | 404 | The contract, party, company or user does not exist |
 | 409 | Wrong contract status for this action, or the contract was changed by someone else |
 
@@ -288,11 +294,19 @@ Where the specification leaves a choice open, we decided:
 - **Optimistic concurrency** on contracts (`RowVersion`) to prevent conflicting updates; a conflict returns 409.
 - **Audit entries are saved in the same transaction** as the change they describe.
 
+## Testing
+
+```bash
+dotnet test
+```
+
+Domain tests cover every lifecycle rule; service tests use an in-memory SQLite database. 100 tests pass on `develop`.
+
 ## Development workflow
 
 We use **GitFlow**:
 
-- `develop` is the default branch for day-to-day work; `main` holds stable releases.
+- `develop` holds day-to-day work; `main` holds stable releases (v1.0 is tagged on `main`).
 - Each task gets its own branch from `develop`, e.g. `feature/S2-06-submit-contract`.
 - Changes reach `develop` through pull requests reviewed by a teammate.
 - Pull `develop` before creating a migration, and announce new migrations to the team.
@@ -306,10 +320,17 @@ We use **GitFlow**:
 - [x] JWT login and role-based authorization
 - [x] Companies, users, parties, create contract, parties/documents, lifecycle actions (API)
 - [x] Screens: login, companies, parties, create contract, lifecycle actions, role-based route guards
-- [ ] Users screen (in review)
-- [ ] Contract details page and contract list
-- [ ] Contract search, expiration job, audit history, dashboard
-- [ ] Release v1.0
+- [x] Users screen and company activation
+- [x] Navigation menu and signed-in user
+- [x] Contract details page with lifecycle actions
+- [x] Audit history and dashboard
+- [x] 100 automated tests passing
+- [x] Release v1.0
+- [ ] Contract list with search and filters
+- [ ] Automatic expiration job with warnings before expiry
+- [ ] Dashboard per company
+- [ ] Time zone for "today" (UTC or Saudi time)
+- [ ] Swagger "Authorize" button for Bearer tokens
 
 ## Team
 
