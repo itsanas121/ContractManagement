@@ -1,0 +1,46 @@
+@if (hasActions() || successMessage() || errors().length) {
+  <section class="contract-actions">
+    <h3>Actions</h3>
+
+    @if (successMessage()) {
+      <p class="success" role="status">{{ successMessage() }}</p>
+    }
+
+    @if (errors().length) {
+      <ul class="errors" role="alert">
+        @for (error of errors(); track error) {
+          <li>{{ error }}</li>
+        }
+      </ul>
+    }
+
+    @if (reasonFor()) {
+      <div class="reason-box">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ reasonFor() === 'reject' ? 'Rejection reason' : 'Termination reason' }}</mat-label>
+          <textarea matInput rows="3" maxlength="1000" [(ngModel)]="reason" [disabled]="busy()"></textarea>
+        </mat-form-field>
+        <div class="buttons">
+          <button mat-flat-button (click)="confirmReason()" [disabled]="busy()">Confirm</button>
+          <button mat-button (click)="cancelReason()" [disabled]="busy()">Cancel</button>
+        </div>
+      </div>
+    } @else {
+      <div class="buttons">
+        @if (canSubmit()) {
+          <button mat-flat-button (click)="submit()" [disabled]="busy()">Submit for review</button>
+        }
+        @if (canReview()) {
+          <button mat-flat-button (click)="approve()" [disabled]="busy()">Approve</button>
+          <button mat-stroked-button (click)="openReason('reject')" [disabled]="busy()">Reject</button>
+        }
+        @if (canActivate()) {
+          <button mat-flat-button (click)="activate()" [disabled]="busy()">Activate</button>
+        }
+        @if (canTerminate()) {
+          <button mat-stroked-button (click)="openReason('terminate')" [disabled]="busy()">Terminate</button>
+        }
+      </div>
+    }
+  </section>
+}

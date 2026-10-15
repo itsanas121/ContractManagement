@@ -1,0 +1,55 @@
+<header class="navbar">
+
+  <!-- Application Name -->
+  <a class="brand" routerLink="/home">
+    Contract Management
+  </a>
+
+  <!-- Navigation Links -->
+  <nav class="nav-links" aria-label="Main navigation">
+
+    <!-- Home: All users -->
+    <a mat-button routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      Home
+    </a>
+
+    <!-- Parties -->
+    @if (role === 'Administrator' || role === 'ContractManager') {
+    <a mat-button routerLink="/parties" routerLinkActive="active">
+      Parties
+    </a>
+    }
+
+    <!-- Companies -->
+    @if (role === 'Administrator') {
+    <a mat-button routerLink="/companies" routerLinkActive="active">
+      Companies
+    </a>
+    }
+
+    <!-- Users -->
+    @if (role === 'Administrator') {
+    <a mat-button routerLink="/users" routerLinkActive="active">
+      Users
+    </a>
+    }
+
+    <!-- Create Contract -->
+    @if (role === 'ContractManager') {
+    <a mat-button routerLink="/contracts/create" routerLinkActive="active">
+      Create Contract
+    </a>
+    }
+
+  </nav>
+
+  <!-- Signed-in user + Logout -->
+  <div class="user-area">
+    <span class="user">
+      <span class="material-symbols-outlined">account_circle</span>
+      {{ email }} · {{ roleLabel[role] ?? role }}
+    </span>
+    <button mat-stroked-button type="button" (click)="logout()">Logout</button>
+  </div>
+
+</header>

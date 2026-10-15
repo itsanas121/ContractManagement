@@ -1,0 +1,197 @@
+
+<main class="company-page">
+
+  <header class="page-header">
+    <div>
+      <h1>Company Management</h1>
+      <p>Register and manage companies in the Contract Management System.</p>
+    </div>
+
+  </header>
+
+  <!-- Create Company -->
+  <section class="card">
+    <h2>Register Company</h2>
+    <p class="section-description">
+      Enter the company information below.
+    </p>
+
+    <form [formGroup]="companyForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Company Name</mat-label>
+
+          <input matInput formControlName="name" />
+
+          @if (companyForm.controls.name.hasError('required')) {
+          <mat-error>Company name is required.</mat-error>
+          } @else if (companyForm.controls.name.hasError('pattern')) {
+          <mat-error>Enter a valid company name.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Registration Number</mat-label>
+
+          <input matInput formControlName="registrationNumber" />
+
+          @if (companyForm.controls.registrationNumber.hasError('required')) {
+          <mat-error>Registration number is required.</mat-error>
+          } @else if (companyForm.controls.registrationNumber.hasError('pattern')) {
+          <mat-error>Enter a valid registration number.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email (Optional)</mat-label>
+
+          <input matInput
+                 type="email"
+                 formControlName="email" />
+
+          @if (companyForm.controls.email.hasError('email')) {
+          <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Phone (Optional)</mat-label>
+
+          <input matInput
+                 type="tel"
+                 formControlName="phone" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Address (Optional)</mat-label>
+
+          <input matInput
+                    type="text"
+                    formControlName="address" />
+        </mat-form-field>
+
+      </div>
+
+      @if (submitError) {
+      <p class="error-message" role="alert">
+        {{ submitError }}
+      </p>
+      }
+
+      @if (successMessage) {
+      <p class="success-message" role="status">
+        {{ successMessage }}
+      </p>
+      }
+
+      <div class="form-actions">
+        <button mat-flat-button
+                type="submit"
+                [disabled]="saving">
+          {{ saving ? 'Creating...' : 'Create Company' }}
+        </button>
+      </div>
+
+    </form>
+  </section>
+
+  <!-- Company List -->
+  <section class="card">
+    <div class="section-header">
+      <div>
+        <h2>Registered Companies</h2>
+        <p class="section-description">
+          View all companies registered in the system.
+        </p>
+      </div>
+
+      <button mat-stroked-button
+              type="button"
+              (click)="loadCompanies()"
+              [disabled]="loadingCompanies">
+        Refresh
+      </button>
+    </div>
+    @if (statusError) {
+    <p class="error-message" role="alert">
+      {{ statusError }}
+    </p>
+    }
+
+    @if (statusSuccess) {
+    <p class="success-message" role="status">
+      {{ statusSuccess }}
+    </p>
+    }
+
+    @if (loadingCompanies) {
+    <p>Loading companies...</p>
+    }
+
+    @if (loadError) {
+    <p class="error-message" role="alert">
+      {{ loadError }}
+    </p>
+    }
+
+    @if (!loadingCompanies && !loadError && companies.length === 0) {
+    <p class="empty-state">No companies registered yet.</p>
+    }
+
+    @if (!loadingCompanies && !loadError && companies.length > 0) {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Registration Number</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (company of companies; track company.id) {
+          <tr>
+            <td>{{ company.name }}</td>
+            <td>{{ company.registrationNumber }}</td>
+            <td>{{ company.email || '—' }}</td>
+            <td>{{ company.phone || '—' }}</td>
+            <td>{{ company.address || '—' }}</td>
+            <td>
+              <span class="status"
+                    [class.active]="company.status === 'Active'">
+                {{ company.status }}
+              </span>
+            </td>
+            <td>{{ company.createdAt | date:'mediumDate' }}</td>
+            <td>
+              <button mat-stroked-button
+                      type="button"
+                      (click)="toggleCompanyStatus(company)"
+                      [disabled]="updatingCompanyId !== null || loadingCompanies">
+
+                @if (updatingCompanyId === company.id) {
+                Updating...
+                } @else {
+                {{ company.status === 'Active' ? 'Deactivate' : 'Activate' }}
+                }
+
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+
+  </section>
+
+</main>

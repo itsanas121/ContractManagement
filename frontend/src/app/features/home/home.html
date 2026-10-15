@@ -1,0 +1,55 @@
+<main class="home">
+  <header class="page-head">
+    <h1>Dashboard</h1>
+    <p class="subtitle">Overview of all contracts in the system</p>
+  </header>
+
+  @if (error()) {
+    <p class="error">Could not load the contract summary.</p>
+  } @else if (summary(); as s) {
+    <section class="value-card">
+      <div>
+        <span class="label">Total active contract value</span>
+        <span class="value">{{ s.totalActiveContractValue | number: '1.2-2' }} <small>SAR</small></span>
+      </div>
+      <span class="note">{{ s.active }} active of {{ s.totalContracts }} contracts</span>
+    </section>
+
+    <section class="cards">
+      <div class="card total">
+        <span class="card-head"><span class="material-symbols-outlined">description</span>Total</span>
+        <span class="value">{{ s.totalContracts }}</span>
+      </div>
+      <div class="card draft">
+        <span class="card-head"><span class="material-symbols-outlined">edit_note</span>Draft</span>
+        <span class="value">{{ s.draft }}</span>
+      </div>
+      <div class="card review">
+        <span class="card-head"><span class="material-symbols-outlined">hourglass_top</span>Under review</span>
+        <span class="value">{{ s.underReview }}</span>
+      </div>
+      <div class="card approved">
+        <span class="card-head"><span class="material-symbols-outlined">task_alt</span>Approved</span>
+        <span class="value">{{ s.approved }}</span>
+      </div>
+      <div class="card rejected">
+        <span class="card-head"><span class="material-symbols-outlined">cancel</span>Rejected</span>
+        <span class="value">{{ s.rejected }}</span>
+      </div>
+      <div class="card active">
+        <span class="card-head"><span class="material-symbols-outlined">verified</span>Active</span>
+        <span class="value">{{ s.active }}</span>
+      </div>
+      <div class="card expired">
+        <span class="card-head"><span class="material-symbols-outlined">event_busy</span>Expired</span>
+        <span class="value">{{ s.expired }}</span>
+      </div>
+      <div class="card terminated">
+        <span class="card-head"><span class="material-symbols-outlined">block</span>Terminated</span>
+        <span class="value">{{ s.terminated }}</span>
+      </div>
+    </section>
+  } @else {
+    <p class="subtitle">Loading…</p>
+  }
+</main>
